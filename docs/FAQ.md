@@ -40,9 +40,10 @@ stages drop in; an Ikemen *screenpack* built on Lua layout does not.
 That is the whole point, and Oxyde treats it as something to prove, not promise.
 The same files run with no conversion. Where WinMUGEN and the 1.1 beta disagree,
 Oxyde's behaviour is pinned to the MUGEN manual, with the original engine (run
-under Wine) as the tie-breaker when the manual is silent. The roster is the other
-check: when a rule is ambiguous, Oxyde follows what the thousand characters on
-disk actually assume. One difference runs in your favour — WinMUGEN silently
+under Wine) as the tie-breaker when the manual is silent. A large test library is
+the other check: when a rule is ambiguous, Oxyde follows what the **2,500+ real
+MUGEN characters it is tested against** actually assume (a test corpus — none of
+them ship with the engine; you bring your own). One difference runs in your favour — WinMUGEN silently
 drops a mistyped trigger, and Oxyde implements the full controller set rather than
 failing quietly, so a move that never worked "right" in MUGEN can start working.
 

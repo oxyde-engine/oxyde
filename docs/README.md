@@ -6,6 +6,14 @@ stages and screenpacks you already have, and adds its own modes, tooling and
 state-language extensions on top. (This index lists the docs; the `README.md`
 and `LICENSE.md` one level up cover installing and the license.)
 
+> **A note on the character counts.** The engine ships with just one reference
+> fighter (Arroyo) and one stage — you bring your own roster. The large numbers
+> these docs quote (e.g. *2,527 characters*) are a **test library** the engine is
+> validated against, not content included in the download. Each measurement names
+> the roster it was taken over; a figure that cites the **original 1,051
+> characters** is a historical measurement against the base test set, not a claim
+> about today's 2,500+ archive.
+
 ## Start here
 
 - [ARCHITECTURE.md](ARCHITECTURE.md) — how the engine is put together.

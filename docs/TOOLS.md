@@ -325,9 +325,9 @@ measured by driving each character into the situation the mechanic answers, with
 the knob off, and confirming no meter is ever spent.
 
 ```
-# over the archive's 1,051 characters
+# over the archive's 2,527 characters
 $ oxtool mechanics .
-  characters   1051
+  characters   2527
   opponent     Kung Fu Man
 
 --- chip_damage = 0.125 ---
@@ -3051,7 +3051,7 @@ both rungs and the verdict describes the probe rather than the character.
 
 A third rung at 30 units was added. The probe keeps the best result across
 rungs, so an extra one can only turn a false negative into a hit — it cannot
-cost a result that already worked. Re-gating all 13 characters carrying this
+cost a result that already worked. Re-gating all thirteen characters carrying this
 symptom moved **2 of them (Kodachi, shiki tohno) from WARN to ACCEPT**, with
 one special now connecting, and changed nothing else.
 

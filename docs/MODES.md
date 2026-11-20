@@ -153,7 +153,7 @@ life and meter, and spends a few frames unable to act as it arrives (it can
 still be hit), so a tag is a commitment rather than a free switch.
 
 It is the engine's one **universal tag** turned into a team form: the mechanism
-belongs to the engine, so every one of the 1,051 characters can be tagged
+belongs to the engine, so every one of the 2,527 characters can be tagged
 whether or not its author ever heard of tag play, and because the swap and the
 standby are part of the rollback snapshot, a tag is as replayable and as
 netcode-safe as a jump. See [Universal tag](TAG.md).
@@ -240,7 +240,7 @@ A MUGEN character never states its move list anywhere. What it has is a `.cmd`
 full of named motions and a `[Statedef -1]` full of `ChangeState` controllers
 guarded by `command = "name"`; a move is the join of the two, and reading that
 join out of the character is what `MOVE LIST` does. Nothing is authored per
-character, which is the only way a list can exist for all 1,051 of them.
+character, which is the only way a list can exist for all 2,527 of them.
 
 Each row is a move the character will actually be sent to, with the motion
 written the way the key-config screen names the buttons — `D, DF, F, Z`, where

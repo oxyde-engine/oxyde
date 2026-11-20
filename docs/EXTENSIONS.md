@@ -1386,7 +1386,7 @@ and a behaviour that is not quite Ikemen GO's:
   (above), but no stage in this archive has a 3D background node for it to move.
 * **Movelists.** Ikemen GO reads a `movelist` file named in the DEF; exactly one
   character in this archive ships one. Oxyde *derives* a list from every
-  character's own `.cmd` and `[Statedef -1]`, so all 1,051 have one — and where
+  character's own `.cmd` and `[Statedef -1]`, so all 2,527 have one — and where
   an author has written a file, their names and their ordering win and the
   derived list follows underneath it. `ChangeMovelist` picks between several.
   See [MODES.md](MODES.md).

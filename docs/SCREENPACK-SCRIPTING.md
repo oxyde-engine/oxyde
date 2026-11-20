@@ -72,7 +72,7 @@ nothing for rollback to invalidate, and nothing it returns can reach `step()`.
 Three reasons, in decreasing order of how much they would survive a careless
 change:
 
-1. **A character never names a screenpack.** Not one of the 1,051 here
+1. **A character never names a screenpack.** Not one of the 2,527 here
    references `system.def`. Screenpacks are separate content, so nothing done
    here can touch a character, a stage, a `.cmd`, an `.air` or an `.sff`.
 2. **`system.def` remains the definition.** The engine builds the screen from

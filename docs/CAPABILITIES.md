@@ -14,9 +14,12 @@ character playable roster (2,504 in the test roster), 160 state controllers,
 ## Part 1 — Oxyde, the engine
 
 ### Compatibility (the whole premise)
-- Runs **MUGEN content unmodified** — WinMUGEN through 1.1 — with the 1,051-char
-  roster behaving byte-identically (a 900-tick fingerprint over every character
-  is the gate, and it reads *1051 unchanged* after every change).
+- Runs **MUGEN content unmodified** — WinMUGEN through 1.1. None of it ships with
+  the engine; you bring your own `chars/`. Correctness is **measured against a
+  test library of over 2,500 real MUGEN/Ikemen characters** (2,527 today), every
+  one of which loads, simulates and renders — and a 900-tick determinism
+  fingerprint over a fixed 1,051-character baseline is the gate, byte-identical
+  after every change.
 - **160 state controllers** (90 from Elecbyte's manuals, 66 shared with Ikemen
   GO, 2 Oxyde's own and 2 unattributed) and **281 triggers** (148 beyond the
   manuals).

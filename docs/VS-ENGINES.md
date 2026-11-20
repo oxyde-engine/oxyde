@@ -353,8 +353,8 @@ see the same picture. Eleven of the sixteen are palette transforms, which on
 
 The move list is the clearest example of the same feature reached from two
 directions. Ikemen GO reads a `movelist.dat` the author wrote; exactly one
-character in this archive of 1,051 ships one. Oxyde derives the list from every
-character's own `.cmd` and `[Statedef -1]`, so all 1,051 have one — and where an
+character in this archive of 2,527 ships one. Oxyde derives the list from every
+character's own `.cmd` and `[Statedef -1]`, so all 2,527 have one — and where an
 author *has* written a file, their names and their ordering win and the derived
 list follows underneath.
 

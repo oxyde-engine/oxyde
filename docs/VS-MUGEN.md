@@ -140,7 +140,7 @@ content, and each is a setting away from the original behaviour:
 | Combo counter | screenpack art | Built in: hit count large, then **damage, the share of a life bar it took, and what the defender has left** on a mini bar, on the side of whoever is landing it, growing on each new hit |
 | Team status | ○ | One pip per team member, filled while they can still fight — the whole state of a turns match at a glance |
 | Character portraits | required | Optional; missing ones are letterboxed rather than stretched |
-| Select screen | fixed grid from the screenpack | Roster split down the middle when two people are choosing, each with its own scroll; **type to search 1,051 characters**, and the screenpack's own grid pages with a counter rather than hiding the rest |
+| Select screen | fixed grid from the screenpack | Roster split down the middle when two people are choosing, each with its own scroll; **type to search 2,527 characters**, and the screenpack's own grid pages with a counter rather than hiding the rest |
 | Font | `.fnt` bitmap fonts | Built-in vector-ish face that scales; `.fnt` is parsed but not used for the UI |
 | **Custom screenpacks** | ● | ● | Rendered from `system.def` / `fight.def`. `screenpack = 0` in the options screen swaps in Oxyde's own UI instead |
 | **Options screen** | fixed list | Grouped into six sections, with a range bar on every scale, a gutter mark and a count for what is unsaved, a control legend, and RESTORE DEFAULTS |
