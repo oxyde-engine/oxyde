@@ -1,0 +1,765 @@
+[Begin Action 0]
+Clsn2Default: 1
+ Clsn2[0] = -101,-454,116,-10
+0,0, 0,0, 8
+0,10, 0,0, 5
+0,11, 0,0, 5
+0,1, 0,0, 8
+0,11, 0,0, 5
+0,10, 0,0, 5
+
+[Begin Action 5]
+Clsn2Default: 1
+ Clsn2[0] = -101,-416,116,-11
+5,0, 0,0, 6
+5,1, 0,0, 6
+5,2, 0,0, 6
+5,1, 0,0, 6
+
+[Begin Action 6]
+Clsn2Default: 1
+ Clsn2[0] = -101,-416,116,-11
+5,1, 0,0, 6
+5,2, 0,0, 6
+5,1, 0,0, 6
+5,0, 0,0, 6
+
+[Begin Action 10]
+Clsn2Default: 1
+ Clsn2[0] = -59,-329,116,-15
+10,0, 0,0, 4
+
+[Begin Action 11]
+Clsn2Default: 1
+ Clsn2[0] = -59,-329,116,-15
+10,1, 0,0, 10
+10,0, 0,0, 10
+
+[Begin Action 12]
+Clsn2Default: 1
+ Clsn2[0] = -59,-329,116,-15
+10,0, 0,0, 4
+
+[Begin Action 20]
+Clsn2Default: 1
+ Clsn2[0] = -96,-454,116,-16
+0,1, 0,0, 3
+
+[Begin Action 21]
+Clsn2Default: 1
+ Clsn2[0] = -59,-329,116,-15
+10,0, 0,0, 4
+
+[Begin Action 40]
+Clsn2Default: 1
+ Clsn2[0] = -76,-290,98,-99
+40,0, 0,0, 4
+
+[Begin Action 41]
+Clsn2Default: 1
+ Clsn2[0] = -6,-504,116,-131
+40,1, 0,0, -1
+
+[Begin Action 42]
+Clsn2Default: 1
+ Clsn2[0] = -6,-504,116,-131
+40,1, 0,0, -1
+
+[Begin Action 43]
+Clsn2Default: 1
+ Clsn2[0] = -6,-504,116,-131
+40,1, 0,0, -1
+
+[Begin Action 44]
+Clsn2Default: 1
+ Clsn2[0] = -6,-504,116,-131
+40,1, 0,0, -1
+
+[Begin Action 47]
+Clsn2Default: 1
+ Clsn2[0] = -76,-290,98,-99
+47,0, 0,0, 6
+
+[Begin Action 100]
+Clsn2Default: 1
+ Clsn2[0] = -101,-416,116,-11
+5,0, 0,0, 3
+5,1, 0,0, 3
+5,2, 0,0, 3
+5,1, 0,0, 3
+
+[Begin Action 105]
+Clsn2Default: 1
+ Clsn2[0] = -6,-504,116,-131
+40,1, 0,0, 4
+
+[Begin Action 120]
+Clsn2Default: 1
+ Clsn2[0] = -101,-418,116,-12
+120,0, 0,0, 3
+
+[Begin Action 130]
+Clsn2Default: 1
+ Clsn2[0] = -101,-418,116,-12
+120,0, 0,0, 4
+
+[Begin Action 131]
+Clsn2Default: 1
+ Clsn2[0] = -57,-327,116,-16
+130,0, 0,0, 4
+
+[Begin Action 132]
+Clsn2Default: 1
+ Clsn2[0] = -101,-418,116,-12
+120,0, 0,0, 4
+
+[Begin Action 140]
+Clsn2Default: 1
+ Clsn2[0] = -57,-327,116,-16
+130,0, 0,0, 3
+
+[Begin Action 150]
+Clsn2Default: 1
+ Clsn2[0] = -101,-418,116,-12
+120,0, 0,0, 4
+
+[Begin Action 151]
+Clsn2Default: 1
+ Clsn2[0] = -57,-327,116,-16
+130,0, 0,0, 4
+
+[Begin Action 152]
+Clsn2Default: 1
+ Clsn2[0] = -101,-418,116,-12
+120,0, 0,0, 4
+
+[Begin Action 155]
+Clsn2Default: 1
+ Clsn2[0] = -101,-418,116,-12
+120,0, 0,0, 3
+
+[Begin Action 180]
+Clsn2Default: 1
+ Clsn2[0] = -101,-741,116,-30
+180,0, 0,0, -1
+
+[Begin Action 181]
+Clsn2Default: 1
+ Clsn2[0] = -101,-742,115,-31
+181,0, 0,0, -1
+
+[Begin Action 190]
+Clsn2Default: 1
+ Clsn2[0] = -96,-454,116,-16
+0,1, 0,0, 8
+
+[Begin Action 191]
+Clsn2Default: 1
+ Clsn2[0] = -101,-741,116,-10
+0,1, 0,0, 10
+180,0, 0,0, 40
+0,0, 0,0, 10
+
+[Begin Action 5300]
+Clsn2Default: 1
+ Clsn2[0] = -96,-454,116,-16
+0,1, 0,0, 60
+
+[Begin Action 200]
+Clsn2Default: 1
+ Clsn2[0] = -101,-452,116,-4
+200,0, 0,0, 3
+Clsn1: 1
+ Clsn1[0] = 114,-423,204,-47
+200,1, 0,0, 4
+200,10, 0,0, 2
+200,0, 0,0, 3
+
+[Begin Action 210]
+Clsn2Default: 1
+ Clsn2[0] = -101,-364,116,-21
+Clsn1: 1
+ Clsn1[0] = 116,-405,251,-44
+210,0, 0,0, 4
+210,0, 4,0, 7
+210,0, 0,0, 6
+
+[Begin Action 220]
+Clsn2Default: 1
+ Clsn2[0] = -101,-450,116,-6
+Clsn1: 1
+ Clsn1[0] = 77,-441,226,-49
+220,0, 0,0, 5
+220,1, 0,0, 8
+220,0, 0,0, 8
+
+[Begin Action 230]
+Clsn2Default: 1
+ Clsn2[0] = -101,-364,116,-21
+Clsn1: 1
+ Clsn1[0] = 116,-405,251,-44
+210,0, 0,0, 4
+210,0, 6,0, 8
+210,0, 0,0, 7
+
+[Begin Action 400]
+Clsn2Default: 1
+ Clsn2[0] = -101,-281,36,-48
+Clsn1: 1
+ Clsn1[0] = 36,-293,133,-33
+400,0, 0,0, 3
+400,0, 4,0, 5
+400,0, 0,0, 4
+
+[Begin Action 410]
+Clsn2Default: 1
+ Clsn2[0] = -41,-296,116,-19
+Clsn1: 1
+ Clsn1[0] = 116,-306,206,-33
+400,1, 0,0, 4
+400,1, 5,0, 6
+400,1, 0,0, 5
+
+[Begin Action 430]
+Clsn2Default: 1
+ Clsn2[0] = -41,-296,116,-19
+Clsn1: 1
+ Clsn1[0] = 116,-306,206,-33
+400,1, 0,0, 5
+400,1, 7,0, 7
+400,1, 0,0, 7
+
+[Begin Action 600]
+Clsn2Default: 1
+ Clsn2[0] = -6,-504,116,-131
+Clsn1: 1
+ Clsn1[0] = 116,-463,218,-51
+40,1, 0,0, 4
+40,1, 0,0, 8
+40,1, 0,0, 5
+
+[Begin Action 620]
+Clsn2Default: 1
+ Clsn2[0] = -6,-504,116,-131
+Clsn1: 1
+ Clsn1[0] = 116,-463,218,-51
+40,1, 0,0, 5
+40,1, 0,0, 10
+40,1, 0,0, 6
+
+[Begin Action 800]
+Clsn2Default: 1
+ Clsn2[0] = -101,-450,75,-6
+Clsn1: 1
+ Clsn1[0] = 75,-441,226,-49
+220,0, 0,0, 12
+
+[Begin Action 810]
+Clsn2Default: 1
+ Clsn2[0] = -101,-450,116,-6
+Clsn1: 1
+ Clsn1[0] = 77,-441,226,-49
+220,0, 0,0, 6
+220,1, 0,0, 10
+210,0, 0,0, 14
+
+[Begin Action 820]
+Clsn2Default: 1
+ Clsn2[0] = -101,-378,112,-32
+500,0, 0,0, 10
+
+[Begin Action 1000]
+Clsn2Default: 1
+ Clsn2[0] = -101,-421,116,-20
+Clsn1: 1
+ Clsn1[0] = 116,-444,220,-50
+1000,0, 0,0, 6
+1000,1, 0,0, 8
+1000,0, 0,0, 10
+
+[Begin Action 1005]
+Clsn2Default: 1
+ Clsn2[0] = -6,-10,43,0
+1005,0, 0,0, 4
+
+[Begin Action 1006]
+Clsn2Default: 1
+ Clsn2[0] = -21,-25,34,0
+1006,0, 0,0, 3
+1006,0, 0,0, 3
+1006,0, 0,0, 3
+
+[Begin Action 1100]
+Clsn2Default: 1
+ Clsn2[0] = -101,-422,116,-21
+Clsn1: 1
+ Clsn1[0] = 116,-445,171,-50
+1100,0, 0,0, 4
+1100,0, 5,0, 6
+1100,0, 0,0, 6
+
+[Begin Action 1110]
+Clsn2Default: 1
+ Clsn2[0] = -101,-364,116,-21
+Clsn1: 1
+ Clsn1[0] = 116,-405,251,-44
+210,0, 0,0, 4
+210,0, 6,0, 6
+210,0, 0,0, 6
+
+[Begin Action 1120]
+Clsn2Default: 1
+ Clsn2[0] = -101,-450,116,-6
+Clsn1: 1
+ Clsn1[0] = 77,-441,226,-49
+220,0, 0,0, 5
+220,1, 0,0, 8
+220,0, 0,0, 8
+
+[Begin Action 1200]
+Clsn2Default: 1
+ Clsn2[0] = -101,-518,116,-95
+Clsn1: 1
+ Clsn1[0] = 99,-500,248,-55
+1200,0, 0,0, 4
+1200,1, 0,0, 4
+1200,0, 0,0, 4
+1200,1, 0,0, 4
+1200,0, 0,0, 6
+
+[Begin Action 1300]
+Clsn2Default: 1
+ Clsn2[0] = -6,-508,116,-130
+Clsn1: 1
+ Clsn1[0] = 116,-466,219,-52
+1300,0, 0,0, 4
+1300,0, 0,-6, 8
+1300,0, 0,-2, -1
+
+[Begin Action 1400]
+Clsn2Default: 1
+ Clsn2[0] = -63,-703,116,-287
+Clsn1: 1
+ Clsn1[0] = 116,-668,241,-74
+1400,0, 0,0, 6
+1400,1, 0,0, 10
+1400,0, 0,0, 8
+
+[Begin Action 3000]
+Clsn2Default: 1
+ Clsn2[0] = -101,-622,116,-39
+Clsn1: 1
+ Clsn1[0] = 116,-626,341,-70
+3000,0, 0,0, 10
+3000,1, 0,0, 14
+3000,0, 0,0, 18
+
+[Begin Action 6000]
+Clsn2Default: 1
+ Clsn2[0] = -18,-8,17,0
+6000,0, 0,0, 3
+6000,0, 0,0, 3
+6000,0, 0,0, 3
+
+[Begin Action 6001]
+Clsn2Default: 1
+ Clsn2[0] = -34,-32,31,0
+6001,0, 0,0, 3
+6001,0, 0,0, 3
+6001,0, 0,0, 3
+
+[Begin Action 6002]
+Clsn2Default: 1
+ Clsn2[0] = -27,-36,37,0
+6002,0, 0,0, 4
+6002,0, 0,0, 4
+6002,0, 0,0, 4
+
+[Begin Action 6003]
+Clsn2Default: 1
+ Clsn2[0] = -29,-31,35,0
+6003,0, 0,0, 4
+6003,0, 0,0, 4
+6003,0, 0,0, 4
+6003,0, 0,0, 4
+
+[Begin Action 5000]
+Clsn2Default: 1
+ Clsn2[0] = -101,-378,112,-32
+500,0, 0,0, 8
+
+[Begin Action 5001]
+Clsn2Default: 1
+ Clsn2[0] = -101,-378,112,-32
+500,0, 0,0, 8
+
+[Begin Action 5002]
+Clsn2Default: 1
+ Clsn2[0] = -101,-378,112,-32
+500,0, 0,0, 8
+
+[Begin Action 5005]
+Clsn2Default: 1
+ Clsn2[0] = -101,-378,112,-32
+500,0, 0,0, 8
+
+[Begin Action 5006]
+Clsn2Default: 1
+ Clsn2[0] = -101,-378,112,-32
+500,0, 0,0, 8
+
+[Begin Action 5010]
+Clsn2Default: 1
+ Clsn2[0] = -101,-378,112,-32
+500,0, 0,0, 8
+
+[Begin Action 5011]
+Clsn2Default: 1
+ Clsn2[0] = -101,-378,112,-32
+500,0, 0,0, 8
+
+[Begin Action 5020]
+Clsn2Default: 1
+ Clsn2[0] = -101,-376,112,-30
+501,0, 0,0, 8
+
+[Begin Action 5030]
+Clsn2Default: 1
+ Clsn2[0] = -101,-376,112,-30
+501,0, 0,0, 8
+
+[Begin Action 5035]
+Clsn2Default: 1
+ Clsn2[0] = -101,-376,112,-30
+501,0, 0,0, 8
+
+[Begin Action 5040]
+Clsn2Default: 1
+ Clsn2[0] = -101,-376,112,-30
+501,0, 0,0, 8
+
+[Begin Action 5050]
+Clsn2Default: 1
+ Clsn2[0] = -101,-376,112,-30
+501,0, 0,0, -1
+
+[Begin Action 5070]
+Clsn2Default: 1
+ Clsn2[0] = -101,-376,112,-30
+501,0, 0,0, 8
+
+[Begin Action 5080]
+Clsn2Default: 1
+ Clsn2[0] = -101,-376,112,-30
+501,0, 0,0, 8
+
+[Begin Action 5100]
+Clsn2Default: 1
+ Clsn2[0] = -101,-376,112,-30
+501,0, 0,0, 12
+
+[Begin Action 5110]
+Clsn2Default: 1
+ Clsn2[0] = -101,-376,112,-30
+501,0, 0,10, -1
+
+[Begin Action 5120]
+Clsn2Default: 1
+ Clsn2[0] = -101,-378,112,-32
+500,0, 0,0, 10
+
+[Begin Action 5140]
+Clsn2Default: 1
+ Clsn2[0] = -101,-376,112,-30
+501,0, 0,0, 8
+
+[Begin Action 5150]
+Clsn2Default: 1
+ Clsn2[0] = -101,-376,112,-30
+501,0, 0,10, -1
+
+[Begin Action 5160]
+Clsn2Default: 1
+ Clsn2[0] = -101,-376,112,-30
+501,0, 0,0, 8
+
+[Begin Action 5170]
+Clsn2Default: 1
+ Clsn2[0] = -101,-376,112,-30
+501,0, 0,0, 8
+
+[Begin Action 55000]
+Clsn2Default: 1
+ Clsn2[0] = -101,-448,116,-10
+0,0, 0,0, 4
+
+; ---------------------------------------------------------------------------
+; Hit reactions the common states can compute but the character did not
+; author. Filled from the nearest reaction it does have; see
+; MugenOxyde_Chars/build_gethit_anims.py.
+; ---------------------------------------------------------------------------
+
+[Begin Action 5003]
+Clsn2Default: 1
+ Clsn2[0] = -101,-378,112,-32
+500,0, 0,0, 8
+
+[Begin Action 5004]
+Clsn2Default: 1
+ Clsn2[0] = -101,-378,112,-32
+500,0, 0,0, 8
+
+[Begin Action 5007]
+Clsn2Default: 1
+ Clsn2[0] = -101,-378,112,-32
+500,0, 0,0, 8
+
+[Begin Action 5008]
+Clsn2Default: 1
+ Clsn2[0] = -101,-378,112,-32
+500,0, 0,0, 8
+
+[Begin Action 5009]
+Clsn2Default: 1
+ Clsn2[0] = -101,-378,112,-32
+500,0, 0,0, 8
+
+[Begin Action 5012]
+Clsn2Default: 1
+ Clsn2[0] = -101,-378,112,-32
+500,0, 0,0, 8
+
+[Begin Action 5013]
+Clsn2Default: 1
+ Clsn2[0] = -101,-378,112,-32
+500,0, 0,0, 8
+
+[Begin Action 5014]
+Clsn2Default: 1
+ Clsn2[0] = -101,-378,112,-32
+500,0, 0,0, 8
+
+[Begin Action 5015]
+Clsn2Default: 1
+ Clsn2[0] = -101,-378,112,-32
+500,0, 0,0, 8
+
+[Begin Action 5016]
+Clsn2Default: 1
+ Clsn2[0] = -101,-378,112,-32
+500,0, 0,0, 8
+
+[Begin Action 5017]
+Clsn2Default: 1
+ Clsn2[0] = -101,-378,112,-32
+500,0, 0,0, 8
+
+[Begin Action 5018]
+Clsn2Default: 1
+ Clsn2[0] = -101,-378,112,-32
+500,0, 0,0, 8
+
+[Begin Action 5019]
+Clsn2Default: 1
+ Clsn2[0] = -101,-378,112,-32
+500,0, 0,0, 8
+
+[Begin Action 5021]
+Clsn2Default: 1
+ Clsn2[0] = -101,-376,112,-30
+501,0, 0,0, 8
+
+[Begin Action 5022]
+Clsn2Default: 1
+ Clsn2[0] = -101,-376,112,-30
+501,0, 0,0, 8
+
+[Begin Action 5023]
+Clsn2Default: 1
+ Clsn2[0] = -101,-376,112,-30
+501,0, 0,0, 8
+
+[Begin Action 5024]
+Clsn2Default: 1
+ Clsn2[0] = -101,-376,112,-30
+501,0, 0,0, 8
+
+[Begin Action 5025]
+Clsn2Default: 1
+ Clsn2[0] = -101,-376,112,-30
+501,0, 0,0, 8
+
+[Begin Action 5026]
+Clsn2Default: 1
+ Clsn2[0] = -101,-376,112,-30
+501,0, 0,0, 8
+
+[Begin Action 5027]
+Clsn2Default: 1
+ Clsn2[0] = -101,-376,112,-30
+501,0, 0,0, 8
+
+[Begin Action 5028]
+Clsn2Default: 1
+ Clsn2[0] = -101,-376,112,-30
+501,0, 0,0, 8
+
+[Begin Action 5029]
+Clsn2Default: 1
+ Clsn2[0] = -101,-376,112,-30
+501,0, 0,0, 8
+
+[Begin Action 5047]
+Clsn2Default: 1
+ Clsn2[0] = -101,-376,112,-30
+501,0, 0,0, -1
+
+[Begin Action 5048]
+Clsn2Default: 1
+ Clsn2[0] = -101,-376,112,-30
+501,0, 0,0, -1
+
+[Begin Action 5049]
+Clsn2Default: 1
+ Clsn2[0] = -101,-376,112,-30
+501,0, 0,0, -1
+
+[Begin Action 5051]
+Clsn2Default: 1
+ Clsn2[0] = -101,-376,112,-30
+501,0, 0,0, -1
+
+[Begin Action 5052]
+Clsn2Default: 1
+ Clsn2[0] = -101,-376,112,-30
+501,0, 0,0, -1
+
+[Begin Action 5071]
+Clsn2Default: 1
+ Clsn2[0] = -101,-376,112,-30
+501,0, 0,0, 8
+
+[Begin Action 5081]
+Clsn2Default: 1
+ Clsn2[0] = -101,-376,112,-30
+501,0, 0,0, 8
+
+[Begin Action 5090]
+Clsn2Default: 1
+ Clsn2[0] = -101,-376,112,-30
+501,0, 0,0, 8
+
+[Begin Action 5101]
+Clsn2Default: 1
+ Clsn2[0] = -101,-376,112,-30
+501,0, 0,0, 12
+
+[Begin Action 5111]
+Clsn2Default: 1
+ Clsn2[0] = -101,-376,112,-30
+501,0, 0,10, -1
+
+[Begin Action 5112]
+Clsn2Default: 1
+ Clsn2[0] = -101,-376,112,-30
+501,0, 0,10, -1
+
+[Begin Action 5113]
+Clsn2Default: 1
+ Clsn2[0] = -101,-376,112,-30
+501,0, 0,10, -1
+
+[Begin Action 5114]
+Clsn2Default: 1
+ Clsn2[0] = -101,-376,112,-30
+501,0, 0,10, -1
+
+[Begin Action 5115]
+Clsn2Default: 1
+ Clsn2[0] = -101,-376,112,-30
+501,0, 0,10, -1
+
+[Begin Action 5116]
+Clsn2Default: 1
+ Clsn2[0] = -101,-376,112,-30
+501,0, 0,10, -1
+
+[Begin Action 5117]
+Clsn2Default: 1
+ Clsn2[0] = -101,-376,112,-30
+501,0, 0,10, -1
+
+[Begin Action 5118]
+Clsn2Default: 1
+ Clsn2[0] = -101,-376,112,-30
+501,0, 0,10, -1
+
+[Begin Action 5119]
+Clsn2Default: 1
+ Clsn2[0] = -101,-376,112,-30
+501,0, 0,10, -1
+
+[Begin Action 5121]
+Clsn2Default: 1
+ Clsn2[0] = -101,-378,112,-32
+500,0, 0,0, 10
+
+[Begin Action 5122]
+Clsn2Default: 1
+ Clsn2[0] = -101,-378,112,-32
+500,0, 0,0, 10
+
+[Begin Action 5123]
+Clsn2Default: 1
+ Clsn2[0] = -101,-378,112,-32
+500,0, 0,0, 10
+
+[Begin Action 5124]
+Clsn2Default: 1
+ Clsn2[0] = -101,-378,112,-32
+500,0, 0,0, 10
+
+[Begin Action 5125]
+Clsn2Default: 1
+ Clsn2[0] = -101,-378,112,-32
+500,0, 0,0, 10
+
+[Begin Action 5126]
+Clsn2Default: 1
+ Clsn2[0] = -101,-378,112,-32
+500,0, 0,0, 10
+
+[Begin Action 5127]
+Clsn2Default: 1
+ Clsn2[0] = -101,-378,112,-32
+500,0, 0,0, 10
+
+[Begin Action 5128]
+Clsn2Default: 1
+ Clsn2[0] = -101,-378,112,-32
+500,0, 0,0, 10
+
+[Begin Action 5129]
+Clsn2Default: 1
+ Clsn2[0] = -101,-378,112,-32
+500,0, 0,0, 10
+
+[Begin Action 5200]
+Clsn2Default: 1
+ Clsn2[0] = -101,-378,112,-32
+500,0, 0,0, 8
+
+[Begin Action 5201]
+Clsn2Default: 1
+ Clsn2[0] = -101,-378,112,-32
+500,0, 0,0, 8
+
+[Begin Action 5210]
+Clsn2Default: 1
+ Clsn2[0] = -101,-378,112,-32
+500,0, 0,0, 8
+
+[Begin Action 5500]
+Clsn2Default: 1
+ Clsn2[0] = -101,-376,112,-30
+501,0, 0,10, -1

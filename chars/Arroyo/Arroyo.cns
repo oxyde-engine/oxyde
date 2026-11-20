@@ -1,0 +1,1303 @@
+; ===========================================================================
+;  ARROYO  -  Oxyde original cast
+;  Escrima rushdown.  Fast, plus-on-block sticks, a rekka, a real anti-air,
+;  and the rust that everything in Oxyde is made of.
+;
+;  Written against Elecbyte's own documentation (docs/sctrls.html, cns.html)
+;  and data/common1.cns, which supplies states 0-5900.
+; ===========================================================================
+
+[Data]
+life = 1000
+power = 3000
+attack = 100
+defence = 100
+fall.defence_up = 50
+liedown.time = 60
+airjuggle = 15
+sparkno = 2
+guard.sparkno = 40
+KO.echo = 0
+volume = 0
+IntPersistIndex = 60
+FloatPersistIndex = 40
+
+[Size]
+; The art is drawn at roughly five hundred pixels tall. At 320x240 a fighter
+; stands about ninety units high, so the scale is that ratio - not the 0.72
+; the bundle shipped with, which drew him a screen and a half tall and left
+; his opponent standing between his ankles.
+xscale = 0.187
+yscale = 0.187
+ground.back = 14
+ground.front = 16
+air.back = 12
+air.front = 12
+height = 60
+attack.dist = 160
+proj.attack.dist = 90
+proj.doscale = 0
+head.pos = -5, -86
+mid.pos = -5, -45
+shadowoffset = 0
+draw.offset = 0,0
+
+[Velocity]
+walk.fwd  = 2.6
+walk.back = -2.4
+run.fwd  = 6.0, 0
+run.back = -4.6,-3.8
+jump.neu = 0,-8.6
+jump.back = -2.6
+jump.fwd = 2.8
+runjump.back = -2.6,-8.2
+runjump.fwd = 4.2,-8.2
+airjump.neu = 0,-8.2
+airjump.back = -2.6
+airjump.fwd = 2.8
+air.gethit.groundrecover = -0.15,-3.5
+air.gethit.airrecover.mul = 0.5
+air.gethit.airrecover.add = 0,-3.5
+air.gethit.airrecover.back = -1
+air.gethit.airrecover.fwd = 0
+air.gethit.airrecover.up = -2
+air.gethit.airrecover.down = 1.5
+
+[Movement]
+airjump.num = 1
+airjump.height = 35
+yaccel = 0.44
+stand.friction = 0.85
+crouch.friction = 0.82
+stand.friction.threshold = 2
+crouch.friction.threshold = 0.05
+air.friction.threshold = 0.5
+air.gethit.groundlevel = 25
+air.gethit.groundrecover.ground.threshold = -20
+air.gethit.groundrecover.groundlevel = 10
+air.gethit.airrecover.threshold = -1
+air.gethit.airrecover.yaccel = 0.35
+air.gethit.trip.groundlevel = 15
+down.bounce.offset = 0, 20
+down.bounce.yaccel = 0.4
+down.bounce.groundlevel = 12
+down.friction.threshold = 0.05
+
+[Quotes]
+victory1 = "The river cuts the iron."
+victory2 = "Sinawali never sleeps."
+victory3 = "Oxyde remembers every strike."
+victory4 = "Rust is only patience."
+
+; ---------------------------------------------------------------------------
+; INTRO AND WIN
+; common1.cns supplies 190 and 191 but nothing for the win pose, so the
+; engine has no 180 to send him to unless the character writes one.
+; ---------------------------------------------------------------------------
+[Statedef 190]
+type = S
+ctrl = 0
+anim = 190
+velset = 0,0
+[State 190, Go]
+type = ChangeState
+trigger1 = Time = 0
+value = 191
+
+[Statedef 191]
+type = S
+ctrl = 0
+anim = 191
+velset = 0,0
+[State 191, Dust]
+type = Explod
+trigger1 = AnimElem = 2
+anim = 6000
+pos = 20, -30
+postype = p1
+removetime = -2
+sprpriority = 2
+scale = 0.5, 0.5
+[State 191, End]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+[Statedef 180]
+type = S
+movetype = I
+physics = S
+anim = 180
+velset = 0,0
+ctrl = 0
+[State 180, Next]
+type = ChangeState
+trigger1 = Time = 90
+value = 181
+
+[Statedef 181]
+type = S
+movetype = I
+physics = S
+anim = 181
+ctrl = 0
+[State 181, Hold]
+type = ChangeAnim
+trigger1 = AnimTime = 0
+value = 181
+
+; ---------------------------------------------------------------------------
+; TAUNT
+; ---------------------------------------------------------------------------
+[Statedef 195]
+type = S
+movetype = I
+physics = S
+anim = 5300
+velset = 0,0
+ctrl = 0
+[State 195, End]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+; ===========================================================================
+; NORMALS
+; Every attack states its own `juggle`. That number is what the engine
+; charges the opponent's juggle points when it lands on somebody already
+; falling, and cns.html is explicit that an attack with no value of its own
+; simply keeps whatever the last one used - so leaving them out makes a jab
+; cost as much as a super.
+; ===========================================================================
+
+; --- 5LP : stick jab.  Fast, plus on block, chains into itself -------------
+[Statedef 200]
+type = S
+movetype = A
+physics = S
+juggle = 1
+velset = 0,0
+ctrl = 0
+anim = 200
+poweradd = 12
+[State 200, Snd]
+type = PlaySnd
+trigger1 = AnimElem = 2
+value = S0, 0
+[State 200, Hit]
+type = HitDef
+trigger1 = !movecontact
+attr = S, NA
+damage = 32, 4
+animtype = Light
+guardflag = MA
+hitflag = MAF
+priority = 3, Hit
+pausetime = 5, 5
+sparkno = 2
+guard.sparkno = 40
+sparkxy = -8, -62
+hitsound = 5, 0
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 7
+ground.hittime = 11
+ground.velocity = -3.2
+air.velocity = -1.8, -2.6
+guard.velocity = -4
+ground.cornerpush.veloff = -6
+[State 200, End]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+; --- 5LK : low stick tap.  Must be blocked low ------------------------------
+[Statedef 205]
+type = S
+movetype = A
+physics = S
+juggle = 1
+velset = 0,0
+ctrl = 0
+anim = 200
+poweradd = 12
+[State 205, Hit]
+type = HitDef
+trigger1 = !movecontact
+attr = S, NA
+damage = 30, 4
+animtype = Light
+guardflag = L
+hitflag = MAF
+priority = 3, Hit
+pausetime = 5, 5
+sparkno = 2
+sparkxy = -8, -30
+hitsound = 5, 0
+guardsound = 6, 0
+ground.type = Low
+ground.slidetime = 7
+ground.hittime = 11
+ground.velocity = -3
+air.velocity = -1.8, -2.4
+[State 205, End]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+; --- 5MP : advancing thrust -------------------------------------------------
+[Statedef 210]
+type = S
+movetype = A
+physics = S
+juggle = 2
+velset = 0,0
+ctrl = 0
+anim = 210
+poweradd = 22
+[State 210, Step]
+type = VelSet
+trigger1 = AnimElem = 2
+x = 2.2
+[State 210, Stop]
+type = VelSet
+trigger1 = AnimElem = 3
+x = 0
+[State 210, Hit]
+type = HitDef
+trigger1 = !movecontact
+attr = S, NA
+damage = 58, 8
+animtype = Medium
+guardflag = MA
+hitflag = MAF
+priority = 4, Hit
+pausetime = 8, 8
+sparkno = 2
+guard.sparkno = 40
+sparkxy = -10, -58
+hitsound = 5, 1
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 10
+ground.hittime = 14
+ground.velocity = -4.5
+air.velocity = -2.4, -3
+guard.velocity = -5.5
+ground.cornerpush.veloff = -8
+[State 210, End]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+; --- 5MK : mid stick swing --------------------------------------------------
+[Statedef 215]
+type = S
+movetype = A
+physics = S
+juggle = 2
+velset = 0,0
+ctrl = 0
+anim = 210
+poweradd = 22
+[State 215, Hit]
+type = HitDef
+trigger1 = !movecontact
+attr = S, NA
+damage = 55, 7
+animtype = Medium
+guardflag = MA
+hitflag = MAF
+priority = 4, Hit
+pausetime = 8, 8
+sparkno = 2
+sparkxy = -10, -50
+hitsound = 5, 1
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 10
+ground.hittime = 14
+ground.velocity = -4.5
+air.velocity = -2.4, -3
+[State 215, End]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+; --- 5HP : overhead swing.  Slow, hurts, knocks away ------------------------
+[Statedef 220]
+type = S
+movetype = A
+physics = S
+juggle = 3
+velset = 0,0
+ctrl = 0
+anim = 220
+poweradd = 34
+[State 220, Hit]
+type = HitDef
+trigger1 = !movecontact
+attr = S, NA
+damage = 88, 12
+animtype = Hard
+guardflag = MA
+hitflag = MAF
+priority = 5, Hit
+pausetime = 11, 11
+sparkno = 2
+guard.sparkno = 40
+sparkxy = -12, -66
+hitsound = 5, 2
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 14
+ground.hittime = 18
+ground.velocity = -6.5
+air.velocity = -3.4, -4
+guard.velocity = -7
+ground.cornerpush.veloff = -10
+envshake.time = 5
+envshake.ampl = -3
+[State 220, Flakes]
+type = Explod
+trigger1 = movehit = 1
+anim = 6001
+pos = 46, -58
+postype = p1
+removetime = -2
+sprpriority = 3
+scale = 0.7, 0.7
+[State 220, End]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+; --- 5HK : launcher swing ---------------------------------------------------
+[Statedef 225]
+type = S
+movetype = A
+physics = S
+juggle = 4
+velset = 0,0
+ctrl = 0
+anim = 220
+poweradd = 34
+[State 225, Hit]
+type = HitDef
+trigger1 = !movecontact
+attr = S, NA
+damage = 80, 11
+animtype = Up
+guardflag = MA
+hitflag = MAF
+priority = 5, Hit
+pausetime = 11, 11
+sparkno = 2
+sparkxy = -12, -70
+hitsound = 5, 2
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 14
+ground.hittime = 18
+ground.velocity = -2, -7.5
+air.velocity = -1.6, -7
+yaccel = 0.44
+[State 225, End]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+; --- 6HP "Puno Cross" : command normal, plus on block if spaced -------------
+[Statedef 230]
+type = S
+movetype = A
+physics = S
+juggle = 3
+velset = 0,0
+ctrl = 0
+anim = 230
+poweradd = 30
+[State 230, Step]
+type = VelSet
+trigger1 = AnimElem = 2
+x = 3.4
+[State 230, Stop]
+type = VelSet
+trigger1 = AnimElem = 3
+x = 0
+[State 230, Hit]
+type = HitDef
+trigger1 = !movecontact
+attr = S, NA
+damage = 74, 10
+animtype = Medium
+guardflag = MA
+hitflag = MAF
+priority = 5, Hit
+pausetime = 10, 12
+sparkno = 2
+sparkxy = -12, -60
+hitsound = 5, 2
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 12
+ground.hittime = 20
+guard.hittime = 12
+ground.velocity = -5
+air.velocity = -3, -3.5
+guard.velocity = -3
+ground.cornerpush.veloff = -4
+[State 230, End]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+; --- 2LK --------------------------------------------------------------------
+[Statedef 400]
+type = C
+movetype = A
+physics = C
+juggle = 1
+velset = 0,0
+ctrl = 0
+anim = 400
+poweradd = 12
+[State 400, Hit]
+type = HitDef
+trigger1 = !movecontact
+attr = C, NA
+damage = 28, 4
+animtype = Light
+guardflag = L
+hitflag = MAF
+priority = 3, Hit
+pausetime = 5, 5
+sparkno = 2
+sparkxy = -8, -22
+hitsound = 5, 0
+guardsound = 6, 0
+ground.type = Low
+ground.slidetime = 7
+ground.hittime = 11
+ground.velocity = -2.8
+air.velocity = -1.6, -2.4
+[State 400, End]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 11
+ctrl = 1
+
+; --- 2MP : low thrust -------------------------------------------------------
+[Statedef 410]
+type = C
+movetype = A
+physics = C
+juggle = 2
+velset = 0,0
+ctrl = 0
+anim = 410
+poweradd = 22
+[State 410, Hit]
+type = HitDef
+trigger1 = !movecontact
+attr = C, NA
+damage = 52, 7
+animtype = Medium
+guardflag = M
+hitflag = MAF
+priority = 4, Hit
+pausetime = 8, 8
+sparkno = 2
+sparkxy = -10, -30
+hitsound = 5, 1
+guardsound = 6, 0
+ground.type = Low
+ground.slidetime = 10
+ground.hittime = 14
+ground.velocity = -4.2
+air.velocity = -2.2, -2.8
+[State 410, End]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 11
+ctrl = 1
+
+; --- 2HK : sweep ------------------------------------------------------------
+[Statedef 430]
+type = C
+movetype = A
+physics = C
+juggle = 3
+velset = 0,0
+ctrl = 0
+anim = 430
+poweradd = 32
+[State 430, Hit]
+type = HitDef
+trigger1 = !movecontact
+attr = C, NA
+damage = 76, 10
+animtype = Back
+guardflag = L
+hitflag = MAF
+priority = 4, Hit
+pausetime = 11, 11
+sparkno = 2
+sparkxy = -12, -18
+hitsound = 5, 2
+guardsound = 6, 0
+ground.type = Trip
+ground.slidetime = 14
+ground.hittime = 16
+ground.velocity = -5.5, -3.2
+air.velocity = -3, -3.5
+fall = 1
+fall.recover = 0
+[State 430, End]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 11
+ctrl = 1
+
+; --- j.LP -------------------------------------------------------------------
+[Statedef 600]
+type = A
+movetype = A
+physics = A
+juggle = 2
+ctrl = 0
+anim = 600
+poweradd = 14
+[State 600, Hit]
+type = HitDef
+trigger1 = !movecontact
+attr = A, NA
+damage = 44, 6
+animtype = Light
+guardflag = HA
+hitflag = MAF
+priority = 3, Hit
+pausetime = 6, 6
+sparkno = 2
+sparkxy = -8, -40
+hitsound = 5, 0
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 8
+ground.hittime = 12
+air.hittime = 14
+ground.velocity = -2.6
+air.velocity = -1.8, -2.4
+[State 600, End]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 50
+
+; --- j.HP : overhead drill --------------------------------------------------
+[Statedef 620]
+type = A
+movetype = A
+physics = A
+juggle = 3
+ctrl = 0
+anim = 620
+poweradd = 30
+[State 620, Hit]
+type = HitDef
+trigger1 = !movecontact
+attr = A, NA
+damage = 78, 10
+animtype = Hard
+guardflag = HA
+hitflag = MAF
+priority = 5, Hit
+pausetime = 10, 10
+sparkno = 2
+sparkxy = -10, -46
+hitsound = 5, 2
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 12
+ground.hittime = 16
+air.hittime = 18
+ground.velocity = -3.4
+air.velocity = -2.4, -3.4
+[State 620, End]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 50
+
+; ===========================================================================
+; THROW
+; The shape kfm's own commentary describes: a low-priority Miss-class HitDef
+; that only catches players who are not already in a hit state, a p1stateno
+; for the thrower and a p2stateno that brings the victim into this file.
+; ===========================================================================
+[Statedef 800]
+type = S
+movetype = A
+physics = S
+juggle = 0
+velset = 0,0
+ctrl = 0
+anim = 800
+sprpriority = 2
+[State 800, Grab]
+type = HitDef
+trigger1 = Time = 0
+attr = S, NT
+hitflag = M-
+guardflag =
+priority = 1, Miss
+damage = 0, 0
+pausetime = 0, 0
+sparkno = -1
+hitsound = -1
+p1facing = 1
+p2facing = 1
+p1stateno = 810
+p2stateno = 820
+guard.dist = 0
+fall = 1
+[State 800, Miss]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+[Statedef 810]
+type = S
+movetype = A
+physics = S
+juggle = 0
+velset = 0,0
+ctrl = 0
+anim = 810
+sprpriority = 2
+[State 810, Hold]
+type = TargetBind
+trigger1 = AnimElem = 1
+pos = 30, 0
+[State 810, Hold 2]
+type = TargetBind
+trigger1 = AnimElem = 2
+pos = 34, -14
+[State 810, Hold 3]
+type = TargetBind
+trigger1 = AnimElem = 3
+pos = 26, -6
+[State 810, Hurt]
+type = TargetLifeAdd
+trigger1 = AnimElem = 3
+value = -125
+[State 810, Erode]
+type = TargetPowerAdd
+trigger1 = AnimElem = 3
+value = -180
+[State 810, Snd]
+type = PlaySnd
+trigger1 = AnimElem = 3
+value = S5, 3
+[State 810, Flakes]
+type = Explod
+trigger1 = AnimElem = 3
+anim = 6001
+pos = 30, -34
+postype = p1
+removetime = -2
+sprpriority = 3
+scale = 0.8, 0.8
+[State 810, Shake]
+type = EnvShake
+trigger1 = AnimElem = 3
+time = 8
+ampl = -4
+[State 810, Throw]
+type = TargetState
+trigger1 = AnimTime = 0
+value = 821
+[State 810, End]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+; The victim's half of the throw. Both of these are read out of Arroyo's file
+; while the opponent is inside it, whoever the opponent is.
+[Statedef 820]
+type = A
+movetype = H
+physics = N
+velset = 0,0
+[State 820, Anim]
+type = ChangeAnim2
+trigger1 = Time = 0
+value = 820
+; The escape hatch every MUGEN throw carries: if the hold is ever lost, the
+; victim falls out of the throw instead of being stuck in it.
+[State 820, Loose]
+type = SelfState
+trigger1 = !GetHitVar(isbound)
+value = 5050
+
+[Statedef 821]
+type = A
+movetype = H
+physics = N
+velset = -5.5,-6.5
+[State 821, Fall]
+type = HitFallSet
+trigger1 = Time = 0
+value = 1
+[State 821, Vel]
+type = HitVelSet
+trigger1 = Time = 0
+x = 0
+y = 0
+[State 821, Go]
+type = SelfState
+trigger1 = Time = 1
+value = 5050
+
+; ===========================================================================
+; SPECIALS
+; ===========================================================================
+
+; --- OXIDE BOLT  236 + P ----------------------------------------------------
+; A rust-dust bolt. Light is quick and short, heavy is slow and reaches.
+[Statedef 1000]
+type = S
+movetype = A
+physics = S
+juggle = 3
+velset = 0,0
+ctrl = 0
+anim = 1000
+poweradd = 45
+[State 1000, Snd]
+type = PlaySnd
+trigger1 = Time = 0
+value = S1, 0
+[State 1000, Bolt]
+type = Projectile
+trigger1 = AnimElem = 2
+projanim = 1005
+projhitanim = 1006
+projremanim = 1006
+projremovetime = -1
+projedgebound = 30
+projscale = 0.9, 0.9
+projsprpriority = 3
+offset = 40, -46
+postype = p1
+velocity = ifelse(command = "hold_z", 4.4, ifelse(command = "hold_y", 6.0, 7.4)), 0
+attr = S, SP
+damage = 62, 9
+animtype = Medium
+guardflag = MA
+hitflag = MAF
+priority = 4, Hit
+pausetime = 0, 10
+sparkno = 2
+sparkxy = -10, -46
+hitsound = 5, 2
+guardsound = 6, 0
+air.juggle = 2
+ground.type = High
+ground.slidetime = 12
+ground.hittime = 16
+ground.velocity = -4.6
+air.velocity = -2.6, -3.2
+[State 1000, End]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+; --- TRES GOLPES  236 + K  (three-strike rekka) ------------------------------
+[Statedef 1100]
+type = S
+movetype = A
+physics = S
+juggle = 3
+velset = 0,0
+ctrl = 0
+anim = 1100
+poweradd = 30
+[State 1100, Step]
+type = VelSet
+trigger1 = AnimElem = 2
+x = 4.5
+[State 1100, Stop]
+type = VelSet
+trigger1 = AnimElem = 3
+x = 0
+[State 1100, Hit]
+type = HitDef
+trigger1 = !movecontact
+attr = S, SA
+damage = 62, 8
+animtype = Medium
+guardflag = MA
+hitflag = MAF
+priority = 4, Hit
+pausetime = 8, 8
+sparkno = 2
+sparkxy = -10, -56
+hitsound = 5, 1
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 10
+ground.hittime = 16
+ground.velocity = -3.5
+air.velocity = -2, -3
+[State 1100, Follow]
+type = ChangeState
+triggerall = command = "tres"
+trigger1 = movecontact
+trigger1 = AnimElem = 3
+value = 1110
+[State 1100, End]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+[Statedef 1110]
+type = S
+movetype = A
+physics = S
+juggle = 2
+velset = 0,0
+ctrl = 0
+anim = 1110
+poweradd = 30
+[State 1110, Step]
+type = VelSet
+trigger1 = AnimElem = 2
+x = 4.5
+[State 1110, Stop]
+type = VelSet
+trigger1 = AnimElem = 3
+x = 0
+[State 1110, Hit]
+type = HitDef
+trigger1 = !movecontact
+attr = S, SA
+damage = 60, 8
+animtype = Medium
+guardflag = MA
+hitflag = MAF
+priority = 4, Hit
+pausetime = 8, 8
+sparkno = 2
+sparkxy = -10, -54
+hitsound = 5, 1
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 10
+ground.hittime = 16
+ground.velocity = -3.5
+air.velocity = -2, -3
+[State 1110, Follow]
+type = ChangeState
+triggerall = command = "tres"
+trigger1 = movecontact
+trigger1 = AnimElem = 3
+value = 1120
+[State 1110, End]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+[Statedef 1120]
+type = S
+movetype = A
+physics = S
+juggle = 4
+velset = 0,0
+ctrl = 0
+anim = 1120
+poweradd = 40
+[State 1120, Step]
+type = VelSet
+trigger1 = AnimElem = 2
+x = 3.0
+[State 1120, Stop]
+type = VelSet
+trigger1 = AnimElem = 3
+x = 0
+[State 1120, Hit]
+type = HitDef
+trigger1 = !movecontact
+attr = S, SA
+damage = 94, 12
+animtype = Hard
+guardflag = MA
+hitflag = MAF
+priority = 5, Hit
+pausetime = 12, 12
+sparkno = 2
+sparkxy = -12, -60
+hitsound = 5, 3
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 16
+ground.hittime = 18
+ground.velocity = -6, -5
+air.velocity = -4, -5
+fall = 1
+envshake.time = 6
+envshake.ampl = -4
+[State 1120, Erode]
+type = TargetPowerAdd
+trigger1 = movehit = 1
+value = -140
+[State 1120, Flakes]
+type = Explod
+trigger1 = movehit = 1
+anim = 6001
+pos = 50, -54
+postype = p1
+removetime = -2
+sprpriority = 3
+scale = 0.8, 0.8
+[State 1120, End]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+; --- SINAWALI CYCLONE  214 + K  (air OK) ------------------------------------
+; Three hits on the way through. Each one is its own HitDef, which is how a
+; multi-hit move is written: "a single HitDef is valid only for a single hit."
+[Statedef 1200]
+type = A
+movetype = A
+physics = A
+juggle = 4
+ctrl = 0
+anim = 1200
+poweradd = 40
+velset = 0,0
+[State 1200, Launch]
+type = VelSet
+trigger1 = Time = 0
+trigger1 = prevstateno != 1200
+x = ifelse(command = "hold_c", 5.4, ifelse(command = "hold_b", 4.6, 3.8))
+y = -5.6
+[State 1200, Trail]
+type = AfterImage
+trigger1 = Time = 0
+time = 26
+length = 8
+palcolor = 190
+palbright = 40, 10, 0
+paladd = 24, 6, 0
+palmul = .92, .84, .80
+timegap = 2
+framegap = 3
+[State 1200, Spin]
+type = Explod
+trigger1 = AnimElem = 2
+anim = 6002
+pos = 0, -44
+postype = p1
+removetime = -2
+sprpriority = -1
+scale = 0.9, 0.9
+[State 1200, Hit 1]
+type = HitDef
+trigger1 = AnimElem = 1
+attr = A, SA
+damage = 40, 5
+animtype = Medium
+guardflag = HA
+hitflag = MAF
+priority = 4, Hit
+pausetime = 5, 5
+sparkno = 2
+sparkxy = -10, -46
+hitsound = 5, 1
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 8
+ground.hittime = 12
+air.hittime = 14
+ground.velocity = -1.6, -3
+air.velocity = -1.4, -3
+[State 1200, Hit 2]
+type = HitDef
+trigger1 = AnimElem = 3
+attr = A, SA
+damage = 38, 5
+animtype = Medium
+guardflag = HA
+hitflag = MAF
+priority = 4, Hit
+pausetime = 5, 5
+sparkno = 2
+sparkxy = -10, -46
+hitsound = 5, 1
+guardsound = 6, 0
+air.juggle = 1
+ground.type = High
+ground.slidetime = 8
+ground.hittime = 12
+air.hittime = 14
+ground.velocity = -1.6, -3
+air.velocity = -1.4, -3
+[State 1200, Hit 3]
+type = HitDef
+trigger1 = AnimElem = 5
+attr = A, SA
+damage = 56, 7
+animtype = Hard
+guardflag = HA
+hitflag = MAF
+priority = 5, Hit
+pausetime = 9, 9
+sparkno = 2
+sparkxy = -12, -46
+hitsound = 5, 2
+guardsound = 6, 0
+air.juggle = 1
+ground.type = High
+ground.slidetime = 12
+ground.hittime = 16
+ground.velocity = -4, -4.5
+air.velocity = -3, -4.5
+fall = 1
+[State 1200, Land]
+type = ChangeState
+trigger1 = Vel Y > 0
+trigger1 = Pos Y >= 0
+value = 52
+ctrl = 0
+
+; --- REDONDO UPPER  623 + P  (anti-air, invulnerable on the way up) ---------
+[Statedef 1300]
+type = S
+movetype = A
+physics = S
+juggle = 4
+velset = 0,0
+ctrl = 0
+anim = 1300
+poweradd = 45
+[State 1300, Invul]
+type = NotHitBy
+trigger1 = AnimElem = 1
+trigger1 = command != "hold_x"
+value = SCA
+time = 10
+[State 1300, Rise]
+type = VelSet
+trigger1 = AnimElem = 2
+x = 2.2
+y = -9.4
+[State 1300, Air]
+type = StateTypeSet
+trigger1 = AnimElem = 2
+statetype = A
+physics = A
+[State 1300, Snd]
+type = PlaySnd
+trigger1 = AnimElem = 2
+value = S1, 1
+[State 1300, Hit]
+type = HitDef
+trigger1 = AnimElem = 2
+attr = S, SA
+damage = 104, 14
+animtype = Up
+guardflag = MA
+hitflag = MAF
+priority = 6, Hit
+pausetime = 12, 12
+sparkno = 2
+sparkxy = -12, -70
+hitsound = 5, 3
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 14
+ground.hittime = 18
+ground.velocity = -2, -10
+air.velocity = -1.6, -9.5
+yaccel = 0.44
+fall = 1
+fall.recover = 0
+envshake.time = 6
+envshake.ampl = -4
+[State 1300, Sparks]
+type = Explod
+trigger1 = movehit = 1
+anim = 6000
+pos = 26, -70
+postype = p1
+removetime = -2
+sprpriority = 3
+scale = 0.8, 0.8
+[State 1300, Fall]
+type = ChangeState
+trigger1 = Vel Y > 0
+trigger1 = Pos Y >= 0
+value = 52
+ctrl = 0
+
+; --- ARNIS VAULT  214 + P  (Rolento hop; mobility, crosses over) ------------
+[Statedef 1400]
+type = S
+movetype = I
+physics = S
+velset = 0,0
+ctrl = 0
+anim = 1400
+[State 1400, Hop]
+type = VelSet
+trigger1 = AnimElem = 2
+x = ifelse(command = "hold_z", 6.6, ifelse(command = "hold_y", 5.4, 4.2))
+y = -8.4
+[State 1400, Air]
+type = StateTypeSet
+trigger1 = AnimElem = 2
+statetype = A
+physics = A
+[State 1400, Nothrow]
+type = NotHitBy
+trigger1 = AnimElem = 1
+value = , NT, ST, HT
+time = 22
+[State 1400, Kick]
+type = ChangeState
+triggerall = command = "a" || command = "b" || command = "c"
+trigger1 = statetype = A
+value = 1200
+[State 1400, Land]
+type = ChangeState
+trigger1 = Vel Y > 0
+trigger1 = Pos Y >= 0
+value = 52
+ctrl = 0
+
+; ===========================================================================
+; RIO GRANDE  -  236236 + HK, level 3
+; ===========================================================================
+[Statedef 3000]
+type = S
+movetype = A
+physics = S
+juggle = 8
+velset = 0,0
+ctrl = 0
+anim = 3000
+sprpriority = 4
+[State 3000, Cost]
+type = PowerAdd
+trigger1 = Time = 0
+value = -3000
+[State 3000, Flash]
+type = SuperPause
+trigger1 = Time = 0
+time = 30
+anim = 6003
+pos = 20, -50
+movetime = 30
+darken = 1
+[State 3000, Trail]
+type = AfterImage
+trigger1 = Time = 0
+time = 70
+length = 12
+palcolor = 160
+palbright = 60, 20, 0
+paladd = 40, 10, 0
+palmul = .92, .80, .74
+timegap = 1
+framegap = 2
+[State 3000, Drive]
+type = VelSet
+trigger1 = AnimElem = 2
+x = 5.5
+[State 3000, Stop]
+type = VelSet
+trigger1 = AnimElem = 3
+x = 0
+; Two hits: the crossing strike, then the finish that plants them.
+[State 3000, Hit 1]
+type = HitDef
+trigger1 = AnimElem = 2
+attr = S, HA
+damage = 120, 16
+animtype = Hard
+guardflag = MA
+hitflag = MAF
+priority = 6, Hit
+pausetime = 10, 10
+sparkno = 2
+sparkxy = -12, -60
+hitsound = 5, 3
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 16
+ground.hittime = 26
+ground.velocity = -1, -6
+air.velocity = -1, -6
+yaccel = 0.34
+[State 3000, Hit 2]
+type = HitDef
+trigger1 = AnimElem = 3
+attr = S, HA
+damage = 168, 22
+animtype = Hard
+guardflag = MA
+hitflag = MAFD
+priority = 7, Hit
+pausetime = 18, 18
+sparkno = 2
+sparkxy = -14, -50
+hitsound = 5, 4
+guardsound = 6, 0
+air.juggle = 2
+ground.type = High
+ground.slidetime = 20
+ground.hittime = 24
+ground.velocity = -9, -5
+air.velocity = -7, -6
+fall = 1
+fall.recover = 0
+fall.envshake.time = 14
+fall.envshake.ampl = -8
+envshake.time = 12
+envshake.ampl = -6
+palfx.time = 14
+palfx.mul = 320, 200, 180
+palfx.add = 60, 0, 0
+[State 3000, Erode]
+type = TargetPowerAdd
+trigger1 = movehit = 1
+value = -400
+[State 3000, Burst]
+type = Explod
+trigger1 = movehit = 1
+anim = 6003
+pos = 44, -52
+postype = p1
+removetime = -2
+sprpriority = 4
+scale = 1.1, 1.1
+[State 3000, End]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1

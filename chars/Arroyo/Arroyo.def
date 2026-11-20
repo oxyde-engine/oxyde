@@ -1,0 +1,40 @@
+[Info]
+name = Arroyo
+displayname = Arroyo
+versiondate = 10,26,2026
+mugenversion = 1.0
+author = Oxyde
+pal.defaults = 1,4,2,5,9,6,3,7,8,10,12,11
+localcoord = 320,240
+
+[Files]
+; Oxyde's reference fighter, written in FUSE — the engine's own language.
+; The CNS/CMD originals are kept beside these (Arroyo.cns / Arroyo.cmd) as the
+; readable source the .fuse was transpiled from (oxtool fuse, 0 diagnostics).
+cmd      = Arroyo.cmd.fuse
+cns      = Arroyo.cns.fuse
+st       = Arroyo.cns.fuse
+stcommon = common1.st.fuse
+sprite   = Arroyo.sff
+anim     = Arroyo.air
+sound    = Arroyo.snd
+pal1     = act/Arroyo_01_default.act
+pal2     = act/Arroyo_02_verdigris.act
+pal3     = act/Arroyo_03_ceramic.act
+pal4     = act/Arroyo_04_deeprust.act
+pal5     = act/Arroyo_05_river.act
+pal6     = act/Arroyo_06_gunmetal.act
+pal7     = act/Arroyo_07_brass.act
+pal8     = act/Arroyo_08_jade.act
+pal9     = act/Arroyo_09_crimson.act
+pal10    = act/Arroyo_10_amethyst.act
+pal11    = act/Arroyo_11_ink.act
+pal12    = act/Arroyo_12_patina.act
+
+[Palette Keymap]
+a = 1
+b = 1
+c = 1
+x = 1
+y = 1
+z = 1

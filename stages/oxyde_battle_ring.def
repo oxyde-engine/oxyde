@@ -1,0 +1,143 @@
+; Oxyde Battle Ring - built from the Oxyde Battle Ring concept board
+; Static hi-res bg (sprite 0,0) + procedural additive FX.
+; Engine draws at most 4 BG layers; FX = sweeping spotlights + big-screen flicker + crowd camera-flashes.
+; (A procedural pyro layer was tried and discarded: the arena art is already fire-saturated,
+;  so added additive flames either blend into the bright ring corners or overexpose.)
+[Info]
+name = "Oxyde Battle Ring"
+displayname = "Oxyde Battle Ring"
+versiondate = 10,19,2026
+mugenversion = 1.1
+author = "Oxyde"
+localcoord = 1280,720
+
+[Camera]
+startx = 0
+starty = 0
+boundleft = -560
+boundright = 560
+boundhigh = 0
+boundlow = 0
+tension = 150
+verticalfollow = 0
+floortension = 0
+
+[PlayerInfo]
+p1startx = -220
+p1starty = 0
+p1startz = 0
+p1facing = 1
+p2startx = 220
+p2starty = 0
+p2startz = 0
+p2facing = 1
+leftbound = -1150
+rightbound = 1150
+topbound = 0
+botbound = 0
+
+[Scaling]
+topz = 0
+botz = 0
+topscale = 1
+botscale = 1
+
+[Bound]
+screenleft = 45
+screenright = 45
+
+[StageInfo]
+zoffset = 610
+autoturn = 1
+resetBG = 1
+
+[Shadow]
+intensity = 110
+color = 0,0,0
+yscale = 0.35
+
+[Reflection]
+intensity = 0
+
+[Music]
+bgmusic =
+bgmvolume = 100
+
+[BGdef]
+spr = oxyde_battle_ring.sff
+debugbg = 0
+
+[BG ring]
+type = normal
+spriteno = 0,0
+start = -1387,0
+delta = 1,1
+mask = 0
+
+; --- crowd camera-flash twinkles (additive, behind) ---
+[BG crowd]
+type = anim
+actionno = 140
+start = -1387,180
+delta = 1,1
+trans = add
+mask = 1
+
+; --- big-screen flicker (additive, behind) ---
+[BG screen]
+type = anim
+actionno = 130
+start = -1387,0
+delta = 1,1
+trans = add
+mask = 1
+
+; --- sweeping spotlights (additive, behind) ---
+[BG spot]
+type = anim
+actionno = 110
+start = -1387,0
+delta = 1,1
+trans = add
+mask = 1
+
+[Begin Action 110]
+10,0, 0,0, 5
+10,1, 0,0, 5
+10,2, 0,0, 5
+10,3, 0,0, 5
+10,4, 0,0, 5
+10,5, 0,0, 5
+10,6, 0,0, 5
+10,7, 0,0, 5
+10,8, 0,0, 5
+10,9, 0,0, 5
+10,10, 0,0, 5
+10,11, 0,0, 5
+
+[Begin Action 130]
+30,0, 0,0, 5
+30,1, 0,0, 5
+30,2, 0,0, 4
+30,3, 0,0, 6
+30,4, 0,0, 5
+30,5, 0,0, 5
+
+[Begin Action 140]
+40,0, 0,0, 5
+40,1, 0,0, 5
+40,2, 0,0, 5
+40,3, 0,0, 5
+40,4, 0,0, 5
+40,5, 0,0, 5
+40,6, 0,0, 5
+40,7, 0,0, 5
+40,8, 0,0, 5
+40,9, 0,0, 5
+
+
+; Corner-hit wall-break destination: smash the opponent into the wall here
+; and the fight transfers to this arena (corner_break rule, once per round).
+[Break]
+next = stages/oxyde_grand_ring.def
+damage = 55

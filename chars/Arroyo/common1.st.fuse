@@ -1,0 +1,1087 @@
+state 0 (type: S, physics: S, sprpriority: 0) {
+    if ((Anim != 0 && Anim != 5) || (Anim == 5 && AnimTime == 0)) {
+        ChangeAnim(value: 0)
+    }
+    if Time == 0 {
+        VelSet(y: 0)
+    }
+    if (abs(vel x) < 2 || Time == 4) {
+        VelSet(x: 0)
+    }
+    if !alive {
+        ChangeState(value: 5050)
+    }
+}
+
+state 10 (type: C, physics: C, anim: 10) {
+    if Time == 0 {
+        VelMul(x: .75)
+    }
+    if AnimTime == 0 {
+        ChangeState(value: 11)
+    }
+}
+
+state 11 (type: C, physics: C, anim: 11, sprpriority: 0) {
+    if (Anim == 6 && AnimTime == 0) {
+        ChangeAnim(value: 11)
+    }
+}
+
+state 12 (type: S, physics: S, anim: 12) {
+    if AnimTime == 0 {
+        ChangeState(value: 0)
+    }
+}
+
+state 20 (type: S, physics: S, sprpriority: 0) {
+    if command == "holdfwd" {
+        VelSet(x: const(velocity.walk.fwd.x))
+    }
+    if command == "holdback" {
+        VelSet(x: const(velocity.walk.back.x))
+    }
+    if vel x > 0 && ((Anim != 20 && Anim != 5) || (Anim == 5 && AnimTime == 0)) {
+        ChangeAnim(value: 20)
+    }
+    if vel x < 0 && ((Anim != 21 && Anim != 5) || (Anim == 5 && AnimTime == 0)) {
+        ChangeAnim(value: 21)
+    }
+}
+
+state 40 (type: S, physics: S, anim: 40, ctrl: 0, sprpriority: 1) {
+    if Time == 0 {
+        VarSet(sysvar: 1, value: 0)
+    }
+    if command == "holdfwd" {
+        VarSet(sysvar: 1, value: 1)
+    }
+    if command == "holdback" {
+        VarSet(sysvar: 1, value: -1)
+    }
+    if AnimTime == 0 {
+        VelSet(x: ifelse(sysvar(1) == 0, const(velocity.jump.neu.x), ifelse(sysvar(1) == 1, const(velocity.jump.fwd.x), const(velocity.jump.back.x))), y: const(velocity.jump.y))
+    }
+    if AnimTime == 0 && prevstateno == 100 && sysvar(1) == 1 {
+        VelSet(x: const(velocity.runjump.fwd.x))
+    }
+    if AnimTime == 0 {
+        ChangeState(value: 50, ctrl: 1)
+    }
+}
+
+state 45 (type: A, physics: N, ctrl: 0, velset: 0, 0) {
+    if SelfAnimExist(44) {
+        ChangeAnim(value: 44)
+    }
+    if !SelfAnimExist(44) {
+        ChangeAnim(value: 41)
+    }
+    if Time == 0 {
+        VarSet(sysvar: 1, value: 0)
+    }
+    if command == "holdfwd" {
+        VarSet(sysvar: 1, value: 1)
+    }
+    if command == "holdback" {
+        VarSet(sysvar: 1, value: -1)
+    }
+    if Time == 2 {
+        VelSet(x: ifelse(sysvar(1) == 0, const(velocity.airjump.neu.x), ifelse(sysvar(1) == 1, const(velocity.airjump.fwd.x), const(velocity.airjump.back.x))), y: const(velocity.airjump.y))
+    }
+    if Time == 2 {
+        ChangeState(value: 50, ctrl: 1)
+    }
+}
+
+state 50 (type: A, physics: A) {
+    if Time == 0 {
+        VarSet(sysvar: 1, value: 0)
+    }
+    if Time == 0 {
+        ChangeAnim(value: ifelse((vel x) == 0, 41, ifelse((vel x) > 0, 42, 43)))
+    }
+    if Vel y > -2 && SelfAnimExist(anim + 3) {
+        @persistent(0) 
+        ChangeAnim(value: Anim + 3)
+    }
+}
+
+state 51 (type: A, physics: A) {
+    if 1 {
+        Null()
+    }
+}
+
+state 52 (type: S, physics: S, ctrl: 0, anim: 47) {
+    if Time == 0 {
+        VelSet(y: 0)
+    }
+    if Time == 0 {
+        PosSet(y: 0)
+    }
+    if Time == 3 {
+        CtrlSet(value: 1)
+    }
+    if AnimTime == 0 {
+        ChangeState(value: 0, ctrl: 1)
+    }
+}
+
+state 100 (type: S, physics: S, anim: 100, sprpriority: 1) {
+    if 1 {
+        VelSet(x: const(velocity.run.fwd.x))
+    }
+    if 1 {
+        AssertSpecial(flag: NoWalk)
+    }
+    if 1 {
+        AssertSpecial(flag: NoAutoTurn)
+    }
+    if command != "holdfwd" {
+        ChangeState(value: 0)
+    }
+}
+
+state 105 (type: A, physics: A, ctrl: 0, anim: 105, sprpriority: 1) {
+    if Time == 0 {
+        VelSet(x: const(velocity.run.back.x), y: const(velocity.run.back.y))
+    }
+    if Time == 2 {
+        CtrlSet(value: 1)
+    }
+    if Vel Y > 0 && Pos Y >= 0 {
+        ChangeState(value: 106)
+    }
+}
+
+state 106 (type: S, physics: S, ctrl: 0, anim: 47) {
+    if Time == 0 {
+        VelSet(y: 0)
+    }
+    if Time == 0 {
+        PosSet(y: 0)
+    }
+    if Time == 2 {
+        MakeDust(pos: -5, -2, spacing: 1)
+    }
+    if Time == 7 {
+        ChangeState(value: 0, ctrl: 1)
+    }
+}
+
+state 110 (type: S, physics: N) {
+    if Time == 0 {
+        CtrlSet(value: 0)
+    }
+    if Time == 0 {
+        ChangeAnim(value: 110)
+    }
+    if Time == 0 {
+        HitBy(value: SCA, NT, ST, HT, time: 30)
+    }
+    if Time == 0 {
+        VelSet(x: 0, z: -7)
+    }
+    if 1 {
+        VelMul(z: 0.8)
+    }
+    if AnimTime == -8 {
+        VelSet(z: 0)
+    }
+    if AnimTime == 0 {
+        CtrlSet(value: 1)
+    }
+    if AnimTime == 0 {
+        ChangeState(value: 0)
+    }
+}
+
+state 115 (type: S, physics: N) {
+    if Time == 0 {
+        CtrlSet(value: 0)
+    }
+    if Time == 0 {
+        ChangeAnim(value: 110)
+    }
+    if Time == 0 {
+        HitBy(value: SCA, NT, ST, HT, time: 30)
+    }
+    if Time == 0 {
+        VelSet(x: 0, z: 7)
+    }
+    if 1 {
+        VelMul(z: 0.8)
+    }
+    if AnimTime == -8 {
+        VelSet(z: 0)
+    }
+    if AnimTime == 0 {
+        CtrlSet(value: 1)
+    }
+    if AnimTime == 0 {
+        ChangeState(value: 0)
+    }
+}
+
+state 120 (type: U, physics: U) {
+    if Time == 0 {
+        ChangeAnim(value: 120 + (statetype == C) + (statetype == A) * 2)
+    }
+    if (Time == 0 && statetype == S) {
+        StateTypeSet(physics: S)
+    }
+    if (Time == 0 && statetype == C) {
+        StateTypeSet(physics: C)
+    }
+    if (Time == 0 && statetype == A) {
+        StateTypeSet(physics: A)
+    }
+    if (statetype == S && command == "holddown") {
+        StateTypeSet(statetype: C, physics: C)
+    }
+    if (statetype == C && command != "holddown") {
+        StateTypeSet(statetype: S, physics: S)
+    }
+    if AnimTime == 0 {
+        ChangeState(value: 130 + (statetype == C) + (statetype == A) * 2)
+    }
+    if (command != "holdback" || !inguarddist) {
+        ChangeState(value: 140)
+    }
+}
+
+state 130 (type: S, physics: S) {
+    if Anim != 130 {
+        ChangeAnim(value: 130)
+    }
+    if command == "holddown" {
+        ChangeState(value: 131)
+    }
+    if (command != "holdback" || !inguarddist) {
+        ChangeState(value: 140)
+    }
+}
+
+state 131 (type: C, physics: C) {
+    if Anim != 131 {
+        ChangeAnim(value: 131)
+    }
+    if command != "holddown" {
+        ChangeState(value: 130)
+    }
+    if (command != "holdback" || !inguarddist) {
+        ChangeState(value: 140)
+    }
+}
+
+state 132 (type: A, physics: N) {
+    if Anim != 132 {
+        ChangeAnim(value: 132)
+    }
+    if 1 {
+        VelAdd(y: Const(movement.yaccel))
+    }
+    if 1 {
+        VarSet(sysvar: 0, value: (pos y >= 0) && (vel y > 0))
+    }
+    if sysvar(0) {
+        VelSet(y: 0)
+    }
+    if sysvar(0) {
+        PosSet(y: 0)
+    }
+    if sysvar(0) && command == "holdback" && inguarddist {
+        ChangeState(value: 130)
+    }
+    if sysvar(0) {
+        ChangeState(value: 52)
+    }
+    if (command != "holdback" || !inguarddist) {
+        ChangeState(value: 140)
+    }
+}
+
+state 140 (type: U, physics: U, ctrl: 1) {
+    if Time == 0 {
+        ChangeAnim(value: 140 + (statetype == C) + (statetype == A) * 2)
+    }
+    if (Time == 0 && statetype == S) {
+        StateTypeSet(physics: S)
+    }
+    if (Time == 0 && statetype == C) {
+        StateTypeSet(physics: C)
+    }
+    if (Time == 0 && statetype == A) {
+        StateTypeSet(physics: A)
+    }
+    if (statetype == S && command == "holddown") {
+        StateTypeSet(statetype: C, physics: C)
+    }
+    if (statetype == C && command != "holddown") {
+        StateTypeSet(statetype: S, physics: S)
+    }
+}
+
+state 150 (type: S, movetype: H, physics: N, velset: 0, 0) {
+    if 1 {
+        ChangeAnim(value: 150)
+    }
+    if HitShakeOver {
+        ChangeState(value: 151 + 2 * (command == "holddown"))
+    }
+    if (statetype == S && command == "holddown") {
+        StateTypeSet(statetype: C, physics: C)
+    }
+    if (statetype == C && command != "holddown") {
+        StateTypeSet(statetype: S, physics: S)
+    }
+    if time == 0 {
+        ForceFeedback(waveform: square, time: 3)
+    }
+}
+
+state 151 (type: S, movetype: H, physics: S, anim: 150) {
+    if Time == 0 {
+        HitVelSet(x: 1)
+    }
+    if (Time == GetHitVar(slidetime) || HitOver) {
+        VelSet(x: 0)
+    }
+    if Time == GetHitVar(ctrltime) {
+        CtrlSet(value: 1)
+    }
+    if (statetype == S && command == "holddown") {
+        StateTypeSet(statetype: C, physics: C)
+    }
+    if (statetype == C && command != "holddown") {
+        StateTypeSet(statetype: S, physics: S)
+    }
+    if HitOver {
+        ChangeState(value: 130, ctrl: 1)
+    }
+}
+
+state 152 (type: C, movetype: H, physics: N, velset: 0, 0) {
+    if 1 {
+        ChangeAnim(value: 151)
+    }
+    if HitShakeOver {
+        ChangeState(value: 151 + 2 * (command == "holddown"))
+    }
+    if (statetype == S && command == "holddown") {
+        StateTypeSet(statetype: C, physics: C)
+    }
+    if (statetype == C && command != "holddown") {
+        StateTypeSet(statetype: S, physics: S)
+    }
+    if time == 0 {
+        ForceFeedback(waveform: square, time: 4)
+    }
+}
+
+state 153 (type: C, movetype: H, physics: C, anim: 151) {
+    if Time == 0 {
+        HitVelSet(x: 1)
+    }
+    if (Time == GetHitVar(slidetime) || HitOver) {
+        VelSet(x: 0)
+    }
+    if Time == GetHitVar(ctrltime) {
+        CtrlSet(value: 1)
+    }
+    if (statetype == S && command == "holddown") {
+        StateTypeSet(statetype: C, physics: C)
+    }
+    if (statetype == C && command != "holddown") {
+        StateTypeSet(statetype: S, physics: S)
+    }
+    if HitOver {
+        ChangeState(value: 131, ctrl: 1)
+    }
+}
+
+state 154 (type: A, movetype: H, physics: N, velset: 0, 0) {
+    if 1 {
+        ChangeAnim(value: 152)
+    }
+    if HitShakeOver {
+        ChangeState(value: 155)
+    }
+    if time == 0 {
+        ForceFeedback(waveform: square, time: 4)
+    }
+}
+
+state 155 (type: A, movetype: H, physics: N, anim: 152) {
+    if Time == 0 {
+        HitVelSet(x: 1, y: 1)
+    }
+    if 1 {
+        VelAdd(y: Const(movement.yaccel))
+    }
+    if Time == GetHitVar(ctrltime) {
+        CtrlSet(value: 1)
+    }
+    if 1 {
+        VarSet(sysvar: 0, value: (pos y >= 0) && (vel y > 0))
+    }
+    if sysvar(0) {
+        VelSet(y: 0)
+    }
+    if sysvar(0) {
+        PosSet(y: 0)
+    }
+    if sysvar(0) && command == "holdback" && inguarddist {
+        ChangeState(value: 130)
+    }
+    if sysvar(0) {
+        ChangeState(value: 52)
+    }
+}
+
+state 170 (type: S, ctrl: 0, anim: 170, velset: 0, 0) {
+    if 1 {
+        NotHitBy(value: SCA, time: 1)
+    }
+}
+
+state 175 (type: S, ctrl: 0, velset: 0, 0) {
+    if Time == 0 && !SelfAnimExist(175) {
+        ChangeState(value: 170)
+    }
+    if Time == 0 {
+        ChangeAnim(value: 175)
+    }
+    if 1 {
+        NotHitBy(value: SCA, time: 1)
+    }
+}
+
+state 190 (type: S, ctrl: 0, velset: 0, 0) {
+    if SelfAnimExist(190) {
+        ChangeAnim(value: 190)
+    }
+    if Time == 0 {
+        ChangeState(value: 191)
+    }
+}
+
+state 191 (type: S, ctrl: 0) {
+    if Time == 0 {
+        ChangeState(value: 0)
+    }
+}
+
+state 5000 (type: S, movetype: H, physics: N, velset: 0, 0) {
+    if Time == 0 && GetHitVar(animtype) not in [3, 5] {
+        ChangeAnim(value: ifelse((GetHitVar(groundtype) == 1), 5000, 5010) + GetHitVar(animtype))
+    }
+    if Time == 0 && GetHitVar(animtype) in [3, 5] {
+        ChangeAnim(value: 5030)
+    }
+    if Time == 0 && ((GetHitVar(animtype) in [4, 5]) && (SelfAnimExist(5047 + GetHitVar(animtype)))) {
+        ChangeAnim(value: 5047 + GetHitVar(animtype))
+    }
+    if Time > 0 {
+        ChangeAnim(value: anim)
+    }
+    if (Time == 0 && (GetHitVar(yvel) != 0 || GetHitVar(fall)) || Pos Y != 0) {
+        StateTypeSet(statetype: a)
+    }
+    if HitShakeOver && (GetHitVar(yvel) == 0 && !GetHitVar(fall)) {
+        ChangeState(value: 5001)
+    }
+    if HitShakeOver {
+        ChangeState(value: 5030)
+    }
+    if (anim == 5000 || anim == 5010) {
+        @persistent(0) 
+        ForceFeedback(time: 6, waveform: square)
+    }
+    if (anim == 5001 || anim == 5011) {
+        @persistent(0) 
+        ForceFeedback(
+            time: 8,
+            waveform: sinesquare,
+            ampl: 110, -1, -.3,
+        )
+    }
+    if (anim == 5012 || anim == 5002 || anim == 5030) {
+        @persistent(0) 
+        ForceFeedback(
+            time: 15,
+            waveform: sinesquare,
+            ampl: 140,
+        )
+    }
+}
+
+state 5001 (type: S, movetype: H, physics: S) {
+    if Time == 0 {
+        HitVelSet(x: 1)
+    }
+    if AnimTime == 0 {
+        ChangeAnim(value: 5005 + GetHitVar(animtype) + (GetHitVar(groundtype) == 2) * 10)
+    }
+    if Time >= GetHitVar(slidetime) {
+        VelMul(x: .6)
+    }
+    if HitOver {
+        VelSet(x: 0)
+    }
+    if HitOver {
+        DefenceMulSet(value: 1)
+    }
+    if HitOver {
+        ChangeState(value: 0, ctrl: 1)
+    }
+}
+
+state 5010 (type: C, movetype: H, physics: N, velset: 0, 0) {
+    if Time == 0 && GetHitVar(animtype) not in [3, 5] {
+        ChangeAnim(value: 5020 + GetHitVar(animtype))
+    }
+    if Time == 0 && GetHitVar(animtype) in [3, 5] {
+        ChangeAnim(value: 5030)
+    }
+    if Time == 0 && ((GetHitVar(animtype) in [4, 5]) && (SelfAnimExist(5047 + GetHitVar(animtype)))) {
+        ChangeAnim(value: 5047 + GetHitVar(animtype))
+    }
+    if Time > 0 {
+        ChangeAnim(value: anim)
+    }
+    if Time == 0 && ((GetHitVar(yvel) != 0 || GetHitVar(fall)) || Pos Y != 0) {
+        StateTypeSet(statetype: a)
+    }
+    if HitShakeOver && (GetHitVar(yvel) == 0 && !GetHitVar(fall)) {
+        ChangeState(value: 5011)
+    }
+    if HitShakeOver {
+        ChangeState(value: 5030)
+    }
+    if anim == 5020 {
+        @persistent(0) 
+        ForceFeedback(time: 6, waveform: square)
+    }
+    if anim == 5021 {
+        @persistent(0) 
+        ForceFeedback(
+            time: 8,
+            waveform: sinesquare,
+            ampl: 110, -1, -.3,
+        )
+    }
+    if anim == 5022 {
+        @persistent(0) 
+        ForceFeedback(
+            time: 15,
+            waveform: sinesquare,
+            ampl: 140,
+        )
+    }
+}
+
+state 5011 (type: C, movetype: H, physics: C) {
+    if Time == 0 {
+        HitVelSet(x: 1)
+    }
+    if AnimTime == 0 {
+        ChangeAnim(value: 5025 + GetHitVar(animtype))
+    }
+    if Time >= GetHitVar(slidetime) {
+        VelMul(x: .6)
+    }
+    if HitOver {
+        VelSet(x: 0)
+    }
+    if HitOver {
+        DefenceMulSet(value: 1)
+    }
+    if HitOver {
+        ChangeState(value: 11, ctrl: 1)
+    }
+}
+
+state 5020 (type: A, movetype: H, physics: N, velset: 0, 0) {
+    if Time == 0 && GetHitVar(animtype) not in [3, 5] {
+        ChangeAnim(value: ifelse((GetHitVar(airtype) == 1), 5000, 5010) + GetHitVar(animtype))
+    }
+    if Time == 0 && GetHitVar(animtype) in [3, 5] {
+        ChangeAnim(value: 5030)
+    }
+    if Time == 0 && ((GetHitVar(animtype) in [4, 5]) && (SelfAnimExist(5047 + GetHitVar(animtype)))) {
+        ChangeAnim(value: 5047 + GetHitVar(animtype))
+    }
+    if Time > 0 {
+        ChangeAnim(value: anim)
+    }
+    if HitShakeOver {
+        ChangeState(value: 5030)
+    }
+    if (anim == 5000 || anim == 5010) {
+        @persistent(0) 
+        ForceFeedback(time: 6, waveform: square)
+    }
+    if (anim == 5001 || anim == 5011) {
+        @persistent(0) 
+        ForceFeedback(
+            time: 8,
+            waveform: sinesquare,
+            ampl: 110, -1, -.3,
+        )
+    }
+    if (anim == 5012 || anim == 5002 || anim == 5030 || anim in [5051, 5059]) {
+        @persistent(0) 
+        ForceFeedback(
+            time: 15,
+            waveform: sinesquare,
+            ampl: 140,
+        )
+    }
+}
+
+state 5030 (type: A, movetype: H, physics: N, ctrl: 0) {
+    if 1 {
+        VelAdd(y: GetHitVar(yaccel))
+    }
+    if Time == 0 {
+        HitVelSet(x: 1, y: 1)
+    }
+    if !HitFall && (HitOver || Vel Y > 0 && Pos Y >= 10) {
+        ChangeState(value: 5040)
+    }
+    if HitFall && (HitOver || Vel Y > 0 && Pos Y >= 10) {
+        ChangeState(value: 5050)
+    }
+    if AnimTime == 0 {
+        ChangeState(value: 5035)
+    }
+}
+
+state 5035 (type: A, movetype: H, physics: N) {
+    if Time == 0 && SelfAnimExist(5035) && Anim not in [5051, 5059] && Anim != 5090 {
+        ChangeAnim(value: 5035)
+    }
+    if 1 {
+        VelAdd(y: GetHitVar(yaccel))
+    }
+    if !HitFall && (HitOver || AnimTime == 0 || Vel Y > 0 && Pos Y >= 10 || Time == 0 && Anim != 5035) {
+        ChangeState(value: 5040)
+    }
+    if HitFall && (HitOver || AnimTime == 0 || Vel Y > 0 && Pos Y >= 10 || Time == 0 && Anim != 5035) {
+        ChangeState(value: 5050)
+    }
+}
+
+state 5040 (type: A, movetype: H, physics: N) {
+    if !Alive {
+        ChangeState(value: 5050)
+    }
+    if (AnimTime == 0 && Anim != 5040 || Time == 0 && Anim != 5035) {
+        ChangeAnim(value: 5040)
+    }
+    if HitOver {
+        CtrlSet(value: 1)
+    }
+    if HitOver {
+        StateTypeSet(movetype: I)
+    }
+    if 1 {
+        VelAdd(y: GetHitVar(yaccel))
+    }
+    if Vel Y > 0 && Pos Y >= 0 {
+        ChangeState(value: 52)
+    }
+}
+
+state 5050 (type: A, movetype: H, physics: N) {
+    if (AnimTime == 0 && Anim == 5035 || Time == 0 && Anim != 5035 && ((Anim not in [5051, 5059]) && (Anim not in [5061, 5069])) && Anim != 5090) {
+        ChangeAnim(value: 5050)
+    }
+    if anim in [5050, 5059] && Vel Y >= ifelse(anim == 5050, 1, -2) && SelfAnimExist(anim + 10) {
+        @persistent(0) 
+        ChangeAnim(value: anim + 10)
+    }
+    if 1 {
+        VelAdd(y: GetHitVar(yaccel))
+    }
+    if Vel Y > 0 && Pos Y >= -20 && alive && CanRecover && Command == "recovery" {
+        ChangeState(value: 5200)
+    }
+    if Vel Y > -1 && alive && CanRecover && Command == "recovery" {
+        ChangeState(value: 5210)
+    }
+    if Vel Y > 0 && (Pos Y >= ifelse((anim in [5051, 5059]) || (anim in [5061, 5069]), 0, 25)) {
+        ChangeState(value: 5100)
+    }
+}
+
+state 5070 (type: A, movetype: H, physics: N, velset: 0, 0) {
+    if 1 {
+        ChangeAnim(value: 5070)
+    }
+    if HitShakeOver {
+        ChangeState(value: 5071)
+    }
+    if time == 0 {
+        ForceFeedback(
+            time: 12,
+            waveform: sinesquare,
+            ampl: 140,
+        )
+    }
+}
+
+state 5071 (type: A, movetype: H, physics: N) {
+    if Time == 0 {
+        HitVelSet(x: 1, y: 1)
+    }
+    if 1 {
+        VelAdd(y: GetHitVar(yaccel))
+    }
+    if Vel Y > 0 && Pos Y >= 15 {
+        ChangeState(value: 5110)
+    }
+}
+
+state 5080 (type: L, movetype: H, physics: N, velset: 0, 0) {
+    if time == 0 {
+        VarSet(sysvar: 2, value: ifelse(GetHitVar(yvel) == 0, 5080, 5090))
+    }
+    if time == 0 && ((anim in [5081, 5089]) || (anim in [5111, 5119])) && SelfAnimExist(sysvar(2) + (anim % 10)) {
+        VarAdd(sysvar: 2, value: anim % 10)
+    }
+    if time == 0 && sysvar(2) == 5090 && !SelfAnimExist(5090) {
+        VarSet(sysvar: 2, value: 5030)
+    }
+    if 1 {
+        ChangeAnim(value: sysvar(2))
+    }
+    if HitShakeOver && GetHitVar(yvel) == 0 {
+        ChangeState(value: 5081)
+    }
+    if HitShakeOver && GetHitVar(yvel) != 0 {
+        ChangeState(value: 5030)
+    }
+}
+
+state 5081 (type: L, movetype: H, physics: C) {
+    if Time == 0 {
+        HitVelSet(x: 1)
+    }
+    if HitOver {
+        VelSet(x: 0)
+    }
+    if Time == 0 {
+        VarSet(sysvar: 0, value: 1)
+    }
+    if HitOver {
+        ChangeState(value: 5110)
+    }
+}
+
+state 5100 (type: L, movetype: H, physics: N) {
+    if Time == 0 && GetHitVar(fall.yvel) == 0 && vel x > 1 {
+        VelSet(x: 1)
+    }
+    if Time == 0 {
+        FallEnvShake()
+    }
+    if Time == 0 {
+        VarSet(sysvar: 1, value: floor(vel y))
+    }
+    if time == 0 && (((anim not in [5051, 5059]) && (anim not in [5061, 5069])) || !SelfAnimExist(5100 + (anim % 10))) {
+        ChangeAnim(value: 5100)
+    }
+    if time == 0 && ((anim in [5051, 5059]) || (anim in [5061, 5069])) && SelfAnimExist(5100 + (anim % 10)) {
+        ChangeAnim(value: 5100 + (anim % 10))
+    }
+    if Time == 0 {
+        PosSet(y: 0)
+    }
+    if Time == 0 {
+        VelSet(y: 0)
+    }
+    if Time == 0 {
+        VelMul(x: 0.75)
+    }
+    if Time == 0 && GetHitVar(fall.yvel) == 0 {
+        ChangeState(value: 5110)
+    }
+    if Time == 1 {
+        GameMakeAnim(
+            value: 60 + (sysvar(1) > 5) + (sysvar(1) > 14),
+            pos: 0, 0,
+            under: sysvar(1) <= 14,
+        )
+    }
+    if Time == 3 {
+        HitFallDamage()
+    }
+    if Time == 1 {
+        PlaySnd(value: F7, (sysvar(1) > 5) + (sysvar(1) > 14))
+    }
+    if 1 {
+        PosFreeze()
+    }
+    if AnimTime == 0 {
+        ChangeState(value: 5101)
+    }
+    if Time == 0 {
+        ForceFeedback(
+            waveform: sinesquare,
+            ampl: 128, -3, -.2, .005,
+            time: 20,
+        )
+    }
+}
+
+state 5101 (type: L, movetype: H, physics: N) {
+    if time == 0 && (anim not in [5101, 5109] || !SelfAnimExist(5160 + (anim % 10))) {
+        ChangeAnim(value: 5160)
+    }
+    if time == 0 && anim in [5101, 5109] && SelfAnimExist(5160 + (anim % 10)) {
+        ChangeAnim(value: 5160 + (anim % 10))
+    }
+    if Time == 0 {
+        HitFallVel()
+    }
+    if Time == 0 {
+        PosSet(y: 20)
+    }
+    if 1 {
+        VelAdd(y: .4)
+    }
+    if Vel Y > 0 && Pos Y >= 12 {
+        ChangeState(value: 5110)
+    }
+}
+
+state 5110 (type: L, movetype: H, physics: N) {
+    if Time == 0 {
+        FallEnvShake()
+    }
+    if SelfAnimExist(5110 + (anim % 10)) && anim in [5081, 5089] {
+        @persistent(0) 
+        ChangeAnim(value: 5110 + (anim % 10))
+    }
+    if time == 0 && anim not in [5110, 5119] && (anim not in [5161, 5169] || !SelfAnimExist(5170 + (anim % 10))) {
+        ChangeAnim(value: 5170)
+    }
+    if time == 0 && anim not in [5110, 5119] && anim in [5161, 5169] && SelfAnimExist(5170 + (anim % 10)) {
+        ChangeAnim(value: 5170 + (anim % 10))
+    }
+    if Time == 0 {
+        HitFallDamage()
+    }
+    if Time == 0 {
+        PosSet(y: 0)
+    }
+    if Time == 0 && GetHitVar(fall.yvel) != 0 {
+        VarSet(sysvar: 1, value: floor(vel y))
+    }
+    if Time == 0 && !SysVar(0) {
+        PlaySnd(value: F7, (sysvar(1) > 5) + (sysvar(1) > 14))
+    }
+    if Time == 0 && !SysVar(0) {
+        GameMakeAnim(
+            value: 60 + (sysvar(1) > 5) + (sysvar(1) > 14),
+            pos: 0, 0,
+            under: sysvar(1) <= 14,
+        )
+    }
+    if Time == 0 {
+        VelSet(y: 0)
+    }
+    if anim in [5171, 5179] && SelfAnimExist(5110 + (anim % 10)) && (AnimTime == 0 || SysVar(0)) {
+        @persistent(0) 
+        ChangeAnim(value: 5110 + (anim % 10))
+    }
+    if Anim not in [5111, 5119] && (AnimTime == 0 || SysVar(0)) {
+        @persistent(0) 
+        ChangeAnim(value: 5110)
+    }
+    if !alive && (AnimTime == 0 || SysVar(0) || Anim in [5110, 5119]) {
+        ChangeState(value: 5150)
+    }
+    if SysVar(0) && Time == 0 {
+        VarSet(sysvar: 0, value: 0)
+    }
+    if 1 {
+        VelMul(x: 0.85)
+    }
+    if alive && Time == 0 {
+        ForceFeedback(
+            time: 8,
+            ampl: 240,
+            waveform: sine,
+        )
+    }
+    if !alive && Time == 0 {
+        ForceFeedback(
+            ampl: 200, 7, -.467,
+            time: 30,
+            waveform: sine,
+        )
+    }
+}
+
+state 5120 (type: L, movetype: I, physics: N) {
+    if time == 0 && (anim not in [5111, 5119] || !SelfAnimExist(5120 + (anim % 10))) {
+        ChangeAnim(value: 5120)
+    }
+    if time == 0 && anim in [5111, 5119] && SelfAnimExist(5120 + (anim % 10)) {
+        ChangeAnim(value: 5120 + (anim % 10))
+    }
+    if Time == 0 {
+        VelSet(x: 0)
+    }
+    if 1 {
+        NotHitBy(value: SCA, time: 1)
+    }
+    if AnimTime == 0 {
+        HitFallSet(value: 1)
+    }
+    if AnimTime == 0 {
+        NotHitBy(value: , NT,ST,HT, time: 12)
+    }
+    if AnimTime == 0 {
+        NotHitBy(value2: SCA, time: 3)
+    }
+    if AnimTime == 0 {
+        ChangeState(value: 0, ctrl: 1)
+    }
+}
+
+state 5150 (type: L, movetype: H, physics: N, sprpriority: -3) {
+    if Time == 0 && SelfAnimExist(5140) && (((anim not in [5111, 5119]) && (anim not in [5171, 5179])) || !SelfAnimExist(5140 + (anim % 10))) {
+        ChangeAnim(value: 5140)
+    }
+    if Time == 0 && ((anim in [5111, 5119]) || (anim in [5171, 5179])) && SelfAnimExist(5140 + (anim % 10)) {
+        ChangeAnim(value: 5140 + (anim % 10))
+    }
+    if MatchOver == 1 && Anim in [5140, 5149] && SelfAnimExist(anim + 10) {
+        @persistent(0) 
+        ChangeAnim(value: anim + 10)
+    }
+    if Time == 0 && Anim not in [5140, 5159] && Anim not in [5110, 5119] {
+        ChangeAnim(value: 5110)
+    }
+    if 1 {
+        VelMul(x: 0.85)
+    }
+    if Vel x < .05 {
+        @persistent(0) 
+        VelSet(x: 0)
+    }
+    if 1 {
+        NotHitBy(value: SCA, time: 1)
+    }
+}
+
+state 5200 (type: A, movetype: H, physics: N) {
+    if Anim == 5035 && AnimTime == 0 {
+        ChangeAnim(value: 5050)
+    }
+    if 1 {
+        VelAdd(y: GetHitVar(yaccel))
+    }
+    if Vel Y > 0 && Pos Y >= 10 {
+        SelfState(value: 5201)
+    }
+}
+
+state 5201 (type: A, movetype: H, physics: A, anim: 5200) {
+    if Time == 0 && p2dist X < -5 {
+        Turn()
+    }
+    if Time == 0 {
+        VelSet(x: -.15, y: -3.5)
+    }
+    if Time == 0 {
+        PosSet(y: 0)
+    }
+    if 1 {
+        NotHitBy(value: SCA, time: 1)
+    }
+    if Time == 0 {
+        PalFX(time: 3, add: 128, 128, 128)
+    }
+    if Time == 1 {
+        GameMakeAnim(
+            value: 60,
+            pos: 0, 0,
+            under: 1,
+        )
+    }
+}
+
+state 5210 (type: A, movetype: I, physics: N, anim: 5210, ctrl: 0) {
+    if Time == 0 {
+        PalFX(time: 3, add: 128, 128, 128)
+    }
+    if Time == 0 {
+        PosFreeze(value: 4)
+    }
+    if Time == 0 && p2dist X < -20 {
+        Turn()
+    }
+    if Time == 4 {
+        VelMul(x: .8, y: .8)
+    }
+    if Time == 4 {
+        VelAdd(y: -4.5)
+    }
+    if Time == 4 && Vel Y > 0 {
+        VelMul(y: .5)
+    }
+    if Time == 4 && Vel Y > -3 {
+        VelAdd(y: -2)
+    }
+    if Time == 4 && Vel Y > -2 {
+        VelAdd(y: -1)
+    }
+    if Time == 4 && Command == "holdup" {
+        VelAdd(y: -2)
+    }
+    if Time == 4 && Command == "holddown" {
+        VelAdd(y: 1.5)
+    }
+    if Time == 4 && Command == "holdfwd" {
+        VelMul(x: 1)
+    }
+    if Time == 4 && Command == "holdback" {
+        VelAdd(x: -1)
+    }
+    if Time == 0 {
+        NotHitBy(value: SCA, time: 15)
+    }
+    if Time == 20 {
+        CtrlSet(value: 1)
+    }
+    if Time >= 4 {
+        VelAdd(y: .35)
+    }
+    if Vel Y > 0 && Pos Y >= 0 {
+        ChangeState(value: 52, ctrl: 1)
+    }
+}
+
+state 5500 (type: S, ctrl: 0, anim: 5300, velset: 0, 0) {
+    if time == 0 && SelfAnimExist(5500) {
+        ChangeAnim(value: 5500)
+    }
+}
+
+state 5900 (type: S) {
+    if roundsexisted == 0 {
+        VarRangeSet(value: 0)
+    }
+    if roundsexisted == 0 {
+        VarRangeSet(fvalue: 0)
+    }
+    if roundno == 1 {
+        ChangeState(value: 190)
+    }
+}

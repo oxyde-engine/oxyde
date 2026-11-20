@@ -1,0 +1,981 @@
+// The character's own measurements, from its CNS constants sections.
+constants {
+    data {
+        life = 1000
+        power = 3000
+        attack = 100
+        defence = 100
+        fall.defence_up = 50
+        liedown.time = 60
+        airjuggle = 15
+        sparkno = 2
+        guard.sparkno = 40
+        ko.echo = 0
+        volume = 0
+        intpersistindex = 60
+        floatpersistindex = 40
+    }
+    size {
+        xscale = 0.187
+        yscale = 0.187
+        ground.back = 14
+        ground.front = 16
+        air.back = 12
+        air.front = 12
+        height = 60
+        attack.dist = 160
+        proj.attack.dist = 90
+        proj.doscale = 0
+        head.pos = -5, -86
+        mid.pos = -5, -45
+        shadowoffset = 0
+        draw.offset = 0,0
+    }
+    velocity {
+        walk.fwd = 2.6
+        walk.back = -2.4
+        run.fwd = 6.0, 0
+        run.back = -4.6,-3.8
+        jump.neu = 0,-8.6
+        jump.back = -2.6
+        jump.fwd = 2.8
+        runjump.back = -2.6,-8.2
+        runjump.fwd = 4.2,-8.2
+        airjump.neu = 0,-8.2
+        airjump.back = -2.6
+        airjump.fwd = 2.8
+        air.gethit.groundrecover = -0.15,-3.5
+        air.gethit.airrecover.mul = 0.5
+        air.gethit.airrecover.add = 0,-3.5
+        air.gethit.airrecover.back = -1
+        air.gethit.airrecover.fwd = 0
+        air.gethit.airrecover.up = -2
+        air.gethit.airrecover.down = 1.5
+    }
+    movement {
+        airjump.num = 1
+        airjump.height = 35
+        yaccel = 0.44
+        stand.friction = 0.85
+        crouch.friction = 0.82
+        stand.friction.threshold = 2
+        crouch.friction.threshold = 0.05
+        air.friction.threshold = 0.5
+        air.gethit.groundlevel = 25
+        air.gethit.groundrecover.ground.threshold = -20
+        air.gethit.groundrecover.groundlevel = 10
+        air.gethit.airrecover.threshold = -1
+        air.gethit.airrecover.yaccel = 0.35
+        air.gethit.trip.groundlevel = 15
+        down.bounce.offset = 0, 20
+        down.bounce.yaccel = 0.4
+        down.bounce.groundlevel = 12
+        down.friction.threshold = 0.05
+    }
+}
+
+state 190 (type: S, ctrl: 0, anim: 190, velset: 0, 0) {
+    if Time == 0 {
+        ChangeState(value: 191)
+    }
+}
+
+state 191 (type: S, ctrl: 0, anim: 191, velset: 0, 0) {
+    if AnimElem == 2 {
+        Explod(
+            anim: 6000,
+            pos: 20, -30,
+            postype: p1,
+            removetime: -2,
+            sprpriority: 2,
+            scale: 0.5, 0.5,
+        )
+    }
+    if AnimTime == 0 {
+        ChangeState(value: 0, ctrl: 1)
+    }
+}
+
+state 180 (type: S, movetype: I, physics: S, anim: 180, velset: 0, 0, ctrl: 0) {
+    if Time == 90 {
+        ChangeState(value: 181)
+    }
+}
+
+state 181 (type: S, movetype: I, physics: S, anim: 181, ctrl: 0) {
+    if AnimTime == 0 {
+        ChangeAnim(value: 181)
+    }
+}
+
+state 195 (type: S, movetype: I, physics: S, anim: 5300, velset: 0, 0, ctrl: 0) {
+    if AnimTime == 0 {
+        ChangeState(value: 0, ctrl: 1)
+    }
+}
+
+state 200 (type: S, movetype: A, physics: S, juggle: 1, velset: 0, 0, ctrl: 0, anim: 200, poweradd: 12) {
+    if AnimElem == 2 {
+        PlaySnd(value: S0, 0)
+    }
+    if !movecontact {
+        HitDef(
+            attr: S, NA,
+            damage: 32, 4,
+            animtype: Light,
+            guardflag: MA,
+            hitflag: MAF,
+            priority: 3, Hit,
+            pausetime: 5, 5,
+            sparkno: 2,
+            guard.sparkno: 40,
+            sparkxy: -8, -62,
+            hitsound: 5, 0,
+            guardsound: 6, 0,
+            ground.type: High,
+            ground.slidetime: 7,
+            ground.hittime: 11,
+            ground.velocity: -3.2,
+            air.velocity: -1.8, -2.6,
+            guard.velocity: -4,
+            ground.cornerpush.veloff: -6,
+        )
+    }
+    if AnimTime == 0 {
+        ChangeState(value: 0, ctrl: 1)
+    }
+}
+
+state 205 (type: S, movetype: A, physics: S, juggle: 1, velset: 0, 0, ctrl: 0, anim: 200, poweradd: 12) {
+    if !movecontact {
+        HitDef(
+            attr: S, NA,
+            damage: 30, 4,
+            animtype: Light,
+            guardflag: L,
+            hitflag: MAF,
+            priority: 3, Hit,
+            pausetime: 5, 5,
+            sparkno: 2,
+            sparkxy: -8, -30,
+            hitsound: 5, 0,
+            guardsound: 6, 0,
+            ground.type: Low,
+            ground.slidetime: 7,
+            ground.hittime: 11,
+            ground.velocity: -3,
+            air.velocity: -1.8, -2.4,
+        )
+    }
+    if AnimTime == 0 {
+        ChangeState(value: 0, ctrl: 1)
+    }
+}
+
+state 210 (type: S, movetype: A, physics: S, juggle: 2, velset: 0, 0, ctrl: 0, anim: 210, poweradd: 22) {
+    if AnimElem == 2 {
+        VelSet(x: 2.2)
+    }
+    if AnimElem == 3 {
+        VelSet(x: 0)
+    }
+    if !movecontact {
+        HitDef(
+            attr: S, NA,
+            damage: 58, 8,
+            animtype: Medium,
+            guardflag: MA,
+            hitflag: MAF,
+            priority: 4, Hit,
+            pausetime: 8, 8,
+            sparkno: 2,
+            guard.sparkno: 40,
+            sparkxy: -10, -58,
+            hitsound: 5, 1,
+            guardsound: 6, 0,
+            ground.type: High,
+            ground.slidetime: 10,
+            ground.hittime: 14,
+            ground.velocity: -4.5,
+            air.velocity: -2.4, -3,
+            guard.velocity: -5.5,
+            ground.cornerpush.veloff: -8,
+        )
+    }
+    if AnimTime == 0 {
+        ChangeState(value: 0, ctrl: 1)
+    }
+}
+
+state 215 (type: S, movetype: A, physics: S, juggle: 2, velset: 0, 0, ctrl: 0, anim: 210, poweradd: 22) {
+    if !movecontact {
+        HitDef(
+            attr: S, NA,
+            damage: 55, 7,
+            animtype: Medium,
+            guardflag: MA,
+            hitflag: MAF,
+            priority: 4, Hit,
+            pausetime: 8, 8,
+            sparkno: 2,
+            sparkxy: -10, -50,
+            hitsound: 5, 1,
+            guardsound: 6, 0,
+            ground.type: High,
+            ground.slidetime: 10,
+            ground.hittime: 14,
+            ground.velocity: -4.5,
+            air.velocity: -2.4, -3,
+        )
+    }
+    if AnimTime == 0 {
+        ChangeState(value: 0, ctrl: 1)
+    }
+}
+
+state 220 (type: S, movetype: A, physics: S, juggle: 3, velset: 0, 0, ctrl: 0, anim: 220, poweradd: 34) {
+    if !movecontact {
+        HitDef(
+            attr: S, NA,
+            damage: 88, 12,
+            animtype: Hard,
+            guardflag: MA,
+            hitflag: MAF,
+            priority: 5, Hit,
+            pausetime: 11, 11,
+            sparkno: 2,
+            guard.sparkno: 40,
+            sparkxy: -12, -66,
+            hitsound: 5, 2,
+            guardsound: 6, 0,
+            ground.type: High,
+            ground.slidetime: 14,
+            ground.hittime: 18,
+            ground.velocity: -6.5,
+            air.velocity: -3.4, -4,
+            guard.velocity: -7,
+            ground.cornerpush.veloff: -10,
+            envshake.time: 5,
+            envshake.ampl: -3,
+        )
+    }
+    if movehit == 1 {
+        Explod(
+            anim: 6001,
+            pos: 46, -58,
+            postype: p1,
+            removetime: -2,
+            sprpriority: 3,
+            scale: 0.7, 0.7,
+        )
+    }
+    if AnimTime == 0 {
+        ChangeState(value: 0, ctrl: 1)
+    }
+}
+
+state 225 (type: S, movetype: A, physics: S, juggle: 4, velset: 0, 0, ctrl: 0, anim: 220, poweradd: 34) {
+    if !movecontact {
+        HitDef(
+            attr: S, NA,
+            damage: 80, 11,
+            animtype: Up,
+            guardflag: MA,
+            hitflag: MAF,
+            priority: 5, Hit,
+            pausetime: 11, 11,
+            sparkno: 2,
+            sparkxy: -12, -70,
+            hitsound: 5, 2,
+            guardsound: 6, 0,
+            ground.type: High,
+            ground.slidetime: 14,
+            ground.hittime: 18,
+            ground.velocity: -2, -7.5,
+            air.velocity: -1.6, -7,
+            yaccel: 0.44,
+        )
+    }
+    if AnimTime == 0 {
+        ChangeState(value: 0, ctrl: 1)
+    }
+}
+
+state 230 (type: S, movetype: A, physics: S, juggle: 3, velset: 0, 0, ctrl: 0, anim: 230, poweradd: 30) {
+    if AnimElem == 2 {
+        VelSet(x: 3.4)
+    }
+    if AnimElem == 3 {
+        VelSet(x: 0)
+    }
+    if !movecontact {
+        HitDef(
+            attr: S, NA,
+            damage: 74, 10,
+            animtype: Medium,
+            guardflag: MA,
+            hitflag: MAF,
+            priority: 5, Hit,
+            pausetime: 10, 12,
+            sparkno: 2,
+            sparkxy: -12, -60,
+            hitsound: 5, 2,
+            guardsound: 6, 0,
+            ground.type: High,
+            ground.slidetime: 12,
+            ground.hittime: 20,
+            guard.hittime: 12,
+            ground.velocity: -5,
+            air.velocity: -3, -3.5,
+            guard.velocity: -3,
+            ground.cornerpush.veloff: -4,
+        )
+    }
+    if AnimTime == 0 {
+        ChangeState(value: 0, ctrl: 1)
+    }
+}
+
+state 400 (type: C, movetype: A, physics: C, juggle: 1, velset: 0, 0, ctrl: 0, anim: 400, poweradd: 12) {
+    if !movecontact {
+        HitDef(
+            attr: C, NA,
+            damage: 28, 4,
+            animtype: Light,
+            guardflag: L,
+            hitflag: MAF,
+            priority: 3, Hit,
+            pausetime: 5, 5,
+            sparkno: 2,
+            sparkxy: -8, -22,
+            hitsound: 5, 0,
+            guardsound: 6, 0,
+            ground.type: Low,
+            ground.slidetime: 7,
+            ground.hittime: 11,
+            ground.velocity: -2.8,
+            air.velocity: -1.6, -2.4,
+        )
+    }
+    if AnimTime == 0 {
+        ChangeState(value: 11, ctrl: 1)
+    }
+}
+
+state 410 (type: C, movetype: A, physics: C, juggle: 2, velset: 0, 0, ctrl: 0, anim: 410, poweradd: 22) {
+    if !movecontact {
+        HitDef(
+            attr: C, NA,
+            damage: 52, 7,
+            animtype: Medium,
+            guardflag: M,
+            hitflag: MAF,
+            priority: 4, Hit,
+            pausetime: 8, 8,
+            sparkno: 2,
+            sparkxy: -10, -30,
+            hitsound: 5, 1,
+            guardsound: 6, 0,
+            ground.type: Low,
+            ground.slidetime: 10,
+            ground.hittime: 14,
+            ground.velocity: -4.2,
+            air.velocity: -2.2, -2.8,
+        )
+    }
+    if AnimTime == 0 {
+        ChangeState(value: 11, ctrl: 1)
+    }
+}
+
+state 430 (type: C, movetype: A, physics: C, juggle: 3, velset: 0, 0, ctrl: 0, anim: 430, poweradd: 32) {
+    if !movecontact {
+        HitDef(
+            attr: C, NA,
+            damage: 76, 10,
+            animtype: Back,
+            guardflag: L,
+            hitflag: MAF,
+            priority: 4, Hit,
+            pausetime: 11, 11,
+            sparkno: 2,
+            sparkxy: -12, -18,
+            hitsound: 5, 2,
+            guardsound: 6, 0,
+            ground.type: Trip,
+            ground.slidetime: 14,
+            ground.hittime: 16,
+            ground.velocity: -5.5, -3.2,
+            air.velocity: -3, -3.5,
+            fall: 1,
+            fall.recover: 0,
+        )
+    }
+    if AnimTime == 0 {
+        ChangeState(value: 11, ctrl: 1)
+    }
+}
+
+state 600 (type: A, movetype: A, physics: A, juggle: 2, ctrl: 0, anim: 600, poweradd: 14) {
+    if !movecontact {
+        HitDef(
+            attr: A, NA,
+            damage: 44, 6,
+            animtype: Light,
+            guardflag: HA,
+            hitflag: MAF,
+            priority: 3, Hit,
+            pausetime: 6, 6,
+            sparkno: 2,
+            sparkxy: -8, -40,
+            hitsound: 5, 0,
+            guardsound: 6, 0,
+            ground.type: High,
+            ground.slidetime: 8,
+            ground.hittime: 12,
+            air.hittime: 14,
+            ground.velocity: -2.6,
+            air.velocity: -1.8, -2.4,
+        )
+    }
+    if AnimTime == 0 {
+        ChangeState(value: 50)
+    }
+}
+
+state 620 (type: A, movetype: A, physics: A, juggle: 3, ctrl: 0, anim: 620, poweradd: 30) {
+    if !movecontact {
+        HitDef(
+            attr: A, NA,
+            damage: 78, 10,
+            animtype: Hard,
+            guardflag: HA,
+            hitflag: MAF,
+            priority: 5, Hit,
+            pausetime: 10, 10,
+            sparkno: 2,
+            sparkxy: -10, -46,
+            hitsound: 5, 2,
+            guardsound: 6, 0,
+            ground.type: High,
+            ground.slidetime: 12,
+            ground.hittime: 16,
+            air.hittime: 18,
+            ground.velocity: -3.4,
+            air.velocity: -2.4, -3.4,
+        )
+    }
+    if AnimTime == 0 {
+        ChangeState(value: 50)
+    }
+}
+
+state 800 (type: S, movetype: A, physics: S, juggle: 0, velset: 0, 0, ctrl: 0, anim: 800, sprpriority: 2) {
+    if Time == 0 {
+        HitDef(
+            attr: S, NT,
+            hitflag: M-,
+            guardflag: ,
+            priority: 1, Miss,
+            damage: 0, 0,
+            pausetime: 0, 0,
+            sparkno: -1,
+            hitsound: -1,
+            p1facing: 1,
+            p2facing: 1,
+            p1stateno: 810,
+            p2stateno: 820,
+            guard.dist: 0,
+            fall: 1,
+        )
+    }
+    if AnimTime == 0 {
+        ChangeState(value: 0, ctrl: 1)
+    }
+}
+
+state 810 (type: S, movetype: A, physics: S, juggle: 0, velset: 0, 0, ctrl: 0, anim: 810, sprpriority: 2) {
+    if AnimElem == 1 {
+        TargetBind(pos: 30, 0)
+    }
+    if AnimElem == 2 {
+        TargetBind(pos: 34, -14)
+    }
+    if AnimElem == 3 {
+        TargetBind(pos: 26, -6)
+    }
+    if AnimElem == 3 {
+        TargetLifeAdd(value: -125)
+    }
+    if AnimElem == 3 {
+        TargetPowerAdd(value: -180)
+    }
+    if AnimElem == 3 {
+        PlaySnd(value: S5, 3)
+    }
+    if AnimElem == 3 {
+        Explod(
+            anim: 6001,
+            pos: 30, -34,
+            postype: p1,
+            removetime: -2,
+            sprpriority: 3,
+            scale: 0.8, 0.8,
+        )
+    }
+    if AnimElem == 3 {
+        EnvShake(time: 8, ampl: -4)
+    }
+    if AnimTime == 0 {
+        TargetState(value: 821)
+    }
+    if AnimTime == 0 {
+        ChangeState(value: 0, ctrl: 1)
+    }
+}
+
+state 820 (type: A, movetype: H, physics: N, velset: 0, 0) {
+    if Time == 0 {
+        ChangeAnim2(value: 820)
+    }
+    if !GetHitVar(isbound) {
+        SelfState(value: 5050)
+    }
+}
+
+state 821 (type: A, movetype: H, physics: N, velset: -5.5, -6.5) {
+    if Time == 0 {
+        HitFallSet(value: 1)
+    }
+    if Time == 0 {
+        HitVelSet(x: 0, y: 0)
+    }
+    if Time == 1 {
+        SelfState(value: 5050)
+    }
+}
+
+state 1000 (type: S, movetype: A, physics: S, juggle: 3, velset: 0, 0, ctrl: 0, anim: 1000, poweradd: 45) {
+    if Time == 0 {
+        PlaySnd(value: S1, 0)
+    }
+    if AnimElem == 2 {
+        Projectile(
+            projanim: 1005,
+            projhitanim: 1006,
+            projremanim: 1006,
+            projremovetime: -1,
+            projedgebound: 30,
+            projscale: 0.9, 0.9,
+            projsprpriority: 3,
+            offset: 40, -46,
+            postype: p1,
+            velocity: ifelse(command == "hold_z", 4.4, ifelse(command == "hold_y", 6.0, 7.4)), 0,
+            attr: S, SP,
+            damage: 62, 9,
+            animtype: Medium,
+            guardflag: MA,
+            hitflag: MAF,
+            priority: 4, Hit,
+            pausetime: 0, 10,
+            sparkno: 2,
+            sparkxy: -10, -46,
+            hitsound: 5, 2,
+            guardsound: 6, 0,
+            air.juggle: 2,
+            ground.type: High,
+            ground.slidetime: 12,
+            ground.hittime: 16,
+            ground.velocity: -4.6,
+            air.velocity: -2.6, -3.2,
+        )
+    }
+    if AnimTime == 0 {
+        ChangeState(value: 0, ctrl: 1)
+    }
+}
+
+state 1100 (type: S, movetype: A, physics: S, juggle: 3, velset: 0, 0, ctrl: 0, anim: 1100, poweradd: 30) {
+    if AnimElem == 2 {
+        VelSet(x: 4.5)
+    }
+    if AnimElem == 3 {
+        VelSet(x: 0)
+    }
+    if !movecontact {
+        HitDef(
+            attr: S, SA,
+            damage: 62, 8,
+            animtype: Medium,
+            guardflag: MA,
+            hitflag: MAF,
+            priority: 4, Hit,
+            pausetime: 8, 8,
+            sparkno: 2,
+            sparkxy: -10, -56,
+            hitsound: 5, 1,
+            guardsound: 6, 0,
+            ground.type: High,
+            ground.slidetime: 10,
+            ground.hittime: 16,
+            ground.velocity: -3.5,
+            air.velocity: -2, -3,
+        )
+    }
+    if command == "tres" && movecontact && AnimElem == 3 {
+        ChangeState(value: 1110)
+    }
+    if AnimTime == 0 {
+        ChangeState(value: 0, ctrl: 1)
+    }
+}
+
+state 1110 (type: S, movetype: A, physics: S, juggle: 2, velset: 0, 0, ctrl: 0, anim: 1110, poweradd: 30) {
+    if AnimElem == 2 {
+        VelSet(x: 4.5)
+    }
+    if AnimElem == 3 {
+        VelSet(x: 0)
+    }
+    if !movecontact {
+        HitDef(
+            attr: S, SA,
+            damage: 60, 8,
+            animtype: Medium,
+            guardflag: MA,
+            hitflag: MAF,
+            priority: 4, Hit,
+            pausetime: 8, 8,
+            sparkno: 2,
+            sparkxy: -10, -54,
+            hitsound: 5, 1,
+            guardsound: 6, 0,
+            ground.type: High,
+            ground.slidetime: 10,
+            ground.hittime: 16,
+            ground.velocity: -3.5,
+            air.velocity: -2, -3,
+        )
+    }
+    if command == "tres" && movecontact && AnimElem == 3 {
+        ChangeState(value: 1120)
+    }
+    if AnimTime == 0 {
+        ChangeState(value: 0, ctrl: 1)
+    }
+}
+
+state 1120 (type: S, movetype: A, physics: S, juggle: 4, velset: 0, 0, ctrl: 0, anim: 1120, poweradd: 40) {
+    if AnimElem == 2 {
+        VelSet(x: 3.0)
+    }
+    if AnimElem == 3 {
+        VelSet(x: 0)
+    }
+    if !movecontact {
+        HitDef(
+            attr: S, SA,
+            damage: 94, 12,
+            animtype: Hard,
+            guardflag: MA,
+            hitflag: MAF,
+            priority: 5, Hit,
+            pausetime: 12, 12,
+            sparkno: 2,
+            sparkxy: -12, -60,
+            hitsound: 5, 3,
+            guardsound: 6, 0,
+            ground.type: High,
+            ground.slidetime: 16,
+            ground.hittime: 18,
+            ground.velocity: -6, -5,
+            air.velocity: -4, -5,
+            fall: 1,
+            envshake.time: 6,
+            envshake.ampl: -4,
+        )
+    }
+    if movehit == 1 {
+        TargetPowerAdd(value: -140)
+    }
+    if movehit == 1 {
+        Explod(
+            anim: 6001,
+            pos: 50, -54,
+            postype: p1,
+            removetime: -2,
+            sprpriority: 3,
+            scale: 0.8, 0.8,
+        )
+    }
+    if AnimTime == 0 {
+        ChangeState(value: 0, ctrl: 1)
+    }
+}
+
+state 1200 (type: A, movetype: A, physics: A, juggle: 4, ctrl: 0, anim: 1200, poweradd: 40, velset: 0, 0) {
+    if Time == 0 && prevstateno != 1200 {
+        VelSet(x: ifelse(command == "hold_c", 5.4, ifelse(command == "hold_b", 4.6, 3.8)), y: -5.6)
+    }
+    if Time == 0 {
+        AfterImage(
+            time: 26,
+            length: 8,
+            palcolor: 190,
+            palbright: 40, 10, 0,
+            paladd: 24, 6, 0,
+            palmul: .92, .84, .80,
+            timegap: 2,
+            framegap: 3,
+        )
+    }
+    if AnimElem == 2 {
+        Explod(
+            anim: 6002,
+            pos: 0, -44,
+            postype: p1,
+            removetime: -2,
+            sprpriority: -1,
+            scale: 0.9, 0.9,
+        )
+    }
+    if AnimElem == 1 {
+        HitDef(
+            attr: A, SA,
+            damage: 40, 5,
+            animtype: Medium,
+            guardflag: HA,
+            hitflag: MAF,
+            priority: 4, Hit,
+            pausetime: 5, 5,
+            sparkno: 2,
+            sparkxy: -10, -46,
+            hitsound: 5, 1,
+            guardsound: 6, 0,
+            ground.type: High,
+            ground.slidetime: 8,
+            ground.hittime: 12,
+            air.hittime: 14,
+            ground.velocity: -1.6, -3,
+            air.velocity: -1.4, -3,
+        )
+    }
+    if AnimElem == 3 {
+        HitDef(
+            attr: A, SA,
+            damage: 38, 5,
+            animtype: Medium,
+            guardflag: HA,
+            hitflag: MAF,
+            priority: 4, Hit,
+            pausetime: 5, 5,
+            sparkno: 2,
+            sparkxy: -10, -46,
+            hitsound: 5, 1,
+            guardsound: 6, 0,
+            air.juggle: 1,
+            ground.type: High,
+            ground.slidetime: 8,
+            ground.hittime: 12,
+            air.hittime: 14,
+            ground.velocity: -1.6, -3,
+            air.velocity: -1.4, -3,
+        )
+    }
+    if AnimElem == 5 {
+        HitDef(
+            attr: A, SA,
+            damage: 56, 7,
+            animtype: Hard,
+            guardflag: HA,
+            hitflag: MAF,
+            priority: 5, Hit,
+            pausetime: 9, 9,
+            sparkno: 2,
+            sparkxy: -12, -46,
+            hitsound: 5, 2,
+            guardsound: 6, 0,
+            air.juggle: 1,
+            ground.type: High,
+            ground.slidetime: 12,
+            ground.hittime: 16,
+            ground.velocity: -4, -4.5,
+            air.velocity: -3, -4.5,
+            fall: 1,
+        )
+    }
+    if Vel Y > 0 && Pos Y >= 0 {
+        ChangeState(value: 52, ctrl: 0)
+    }
+}
+
+state 1300 (type: S, movetype: A, physics: S, juggle: 4, velset: 0, 0, ctrl: 0, anim: 1300, poweradd: 45) {
+    if AnimElem == 1 && command != "hold_x" {
+        NotHitBy(value: SCA, time: 10)
+    }
+    if AnimElem == 2 {
+        VelSet(x: 2.2, y: -9.4)
+    }
+    if AnimElem == 2 {
+        StateTypeSet(statetype: A, physics: A)
+    }
+    if AnimElem == 2 {
+        PlaySnd(value: S1, 1)
+    }
+    if AnimElem == 2 {
+        HitDef(
+            attr: S, SA,
+            damage: 104, 14,
+            animtype: Up,
+            guardflag: MA,
+            hitflag: MAF,
+            priority: 6, Hit,
+            pausetime: 12, 12,
+            sparkno: 2,
+            sparkxy: -12, -70,
+            hitsound: 5, 3,
+            guardsound: 6, 0,
+            ground.type: High,
+            ground.slidetime: 14,
+            ground.hittime: 18,
+            ground.velocity: -2, -10,
+            air.velocity: -1.6, -9.5,
+            yaccel: 0.44,
+            fall: 1,
+            fall.recover: 0,
+            envshake.time: 6,
+            envshake.ampl: -4,
+        )
+    }
+    if movehit == 1 {
+        Explod(
+            anim: 6000,
+            pos: 26, -70,
+            postype: p1,
+            removetime: -2,
+            sprpriority: 3,
+            scale: 0.8, 0.8,
+        )
+    }
+    if Vel Y > 0 && Pos Y >= 0 {
+        ChangeState(value: 52, ctrl: 0)
+    }
+}
+
+state 1400 (type: S, movetype: I, physics: S, velset: 0, 0, ctrl: 0, anim: 1400) {
+    if AnimElem == 2 {
+        VelSet(x: ifelse(command == "hold_z", 6.6, ifelse(command == "hold_y", 5.4, 4.2)), y: -8.4)
+    }
+    if AnimElem == 2 {
+        StateTypeSet(statetype: A, physics: A)
+    }
+    if AnimElem == 1 {
+        NotHitBy(value: , NT, ST, HT, time: 22)
+    }
+    if (command == "a" || command == "b" || command == "c") && statetype == A {
+        ChangeState(value: 1200)
+    }
+    if Vel Y > 0 && Pos Y >= 0 {
+        ChangeState(value: 52, ctrl: 0)
+    }
+}
+
+state 3000 (type: S, movetype: A, physics: S, juggle: 8, velset: 0, 0, ctrl: 0, anim: 3000, sprpriority: 4) {
+    if Time == 0 {
+        PowerAdd(value: -3000)
+    }
+    if Time == 0 {
+        SuperPause(
+            time: 30,
+            anim: 6003,
+            pos: 20, -50,
+            movetime: 30,
+            darken: 1,
+        )
+    }
+    if Time == 0 {
+        AfterImage(
+            time: 70,
+            length: 12,
+            palcolor: 160,
+            palbright: 60, 20, 0,
+            paladd: 40, 10, 0,
+            palmul: .92, .80, .74,
+            timegap: 1,
+            framegap: 2,
+        )
+    }
+    if AnimElem == 2 {
+        VelSet(x: 5.5)
+    }
+    if AnimElem == 3 {
+        VelSet(x: 0)
+    }
+    if AnimElem == 2 {
+        HitDef(
+            attr: S, HA,
+            damage: 120, 16,
+            animtype: Hard,
+            guardflag: MA,
+            hitflag: MAF,
+            priority: 6, Hit,
+            pausetime: 10, 10,
+            sparkno: 2,
+            sparkxy: -12, -60,
+            hitsound: 5, 3,
+            guardsound: 6, 0,
+            ground.type: High,
+            ground.slidetime: 16,
+            ground.hittime: 26,
+            ground.velocity: -1, -6,
+            air.velocity: -1, -6,
+            yaccel: 0.34,
+        )
+    }
+    if AnimElem == 3 {
+        HitDef(
+            attr: S, HA,
+            damage: 168, 22,
+            animtype: Hard,
+            guardflag: MA,
+            hitflag: MAFD,
+            priority: 7, Hit,
+            pausetime: 18, 18,
+            sparkno: 2,
+            sparkxy: -14, -50,
+            hitsound: 5, 4,
+            guardsound: 6, 0,
+            air.juggle: 2,
+            ground.type: High,
+            ground.slidetime: 20,
+            ground.hittime: 24,
+            ground.velocity: -9, -5,
+            air.velocity: -7, -6,
+            fall: 1,
+            fall.recover: 0,
+            fall.envshake.time: 14,
+            fall.envshake.ampl: -8,
+            envshake.time: 12,
+            envshake.ampl: -6,
+            palfx.time: 14,
+            palfx.mul: 320, 200, 180,
+            palfx.add: 60, 0, 0,
+        )
+    }
+    if movehit == 1 {
+        TargetPowerAdd(value: -400)
+    }
+    if movehit == 1 {
+        Explod(
+            anim: 6003,
+            pos: 44, -52,
+            postype: p1,
+            removetime: -2,
+            sprpriority: 4,
+            scale: 1.1, 1.1,
+        )
+    }
+    if AnimTime == 0 {
+        ChangeState(value: 0, ctrl: 1)
+    }
+}

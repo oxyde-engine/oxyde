@@ -1,0 +1,696 @@
+<title>Oxyde Engine</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  /* Layout concept: an arcade "attract mode" console. A live depth-grid recedes
+     into an oxide horizon behind the hero; a replay-tape HUD streams the
+     engine's own thesis; fighting-game chrome (super-meter scroll, VS
+     nameplates) frames the page. Committed single dark theme. */
+  :root {
+    color-scheme: dark;
+    --bg: #080a0d;
+    --bg-2: #0d1015;
+    --panel: #12151c;
+    --panel-2: #171b24;
+    --line: #232a37;
+    --line-2: #323a4b;
+    --fg: #eef1f6;
+    --muted: #9aa2b1;
+    --dim: #5b6372;
+    --rust: #ef6a24;
+    --rust-hi: #ff8a44;
+    --ember: #ffb061;
+    --patina: #35c9b0;
+    --patina-dim: #1d6b60;
+    --display: "Oxanium", "Segoe UI", system-ui, sans-serif;
+    --body: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg); color: var(--fg); font-family: var(--body);
+    line-height: 1.62; -webkit-font-smoothing: antialiased; overflow-x: hidden;
+  }
+  a { color: inherit; }
+  code { font-family: var(--mono); }
+  h1,h2,h3 { font-family: var(--display); margin: 0; text-wrap: balance; letter-spacing: -0.01em; }
+  .wrap {
+    max-width: 1120px; margin-inline: auto;
+    padding-left: max(20px, env(safe-area-inset-left, 0px));
+    padding-right: max(20px, env(safe-area-inset-right, 0px));
+  }
+
+  /* ---- boot intro ---- */
+  #boot {
+    position: fixed; inset: 0; z-index: 100; background: var(--bg);
+    display: grid; place-items: center; gap: 0;
+  }
+  #boot .bl { font-family: var(--display); font-weight: 800; font-size: clamp(3rem,13vw,7rem); letter-spacing: 0.02em; color: var(--fg); position: relative; }
+  #boot .bl b { color: var(--rust); }
+  #boot .bar { position: absolute; left: 50%; bottom: -26px; transform: translateX(-50%); width: min(260px, 60vw); height: 3px; background: var(--line); overflow: hidden; }
+  #boot .bar::after { content:""; display:block; height:100%; width:0; background: linear-gradient(90deg, var(--rust), var(--ember)); animation: load 1s ease-out forwards; box-shadow: 0 0 12px var(--rust); }
+  #boot .scan { position: absolute; inset: 0; background: repeating-linear-gradient(0deg, transparent 0 3px, rgba(0,0,0,.35) 3px 4px); pointer-events: none; mix-blend-mode: multiply; }
+  @keyframes load { to { width: 100%; } }
+  body.booted #boot { opacity: 0; visibility: hidden; transition: opacity .5s ease, visibility 0s .5s; pointer-events: none; }
+
+  /* ---- super-meter scroll progress ---- */
+  #meter { position: fixed; top: 0; left: 0; height: 3px; width: 0; z-index: 40; background: linear-gradient(90deg, var(--patina), var(--rust), var(--ember)); box-shadow: 0 0 10px rgba(239,106,36,.6); }
+
+  /* ---- header ---- */
+  header { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 30; background: rgba(8,10,13,.78); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
+  body::before { content:""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top,0px); background: var(--bg); z-index: 41; }
+  .bar-row { display: flex; align-items: center; justify-content: space-between; height: 62px; }
+  .logo { font-family: var(--display); font-weight: 800; font-size: 1.4rem; letter-spacing: .05em; }
+  .logo b { color: var(--rust); }
+  header nav { display: flex; gap: 26px; font-size: .9rem; }
+  header nav a { color: var(--muted); text-decoration: none; transition: color .15s; }
+  header nav a:hover { color: var(--fg); }
+  @media (max-width: 760px){ header nav { display:none; } }
+
+  /* ---- hero ---- */
+  .hero { position: relative; overflow: hidden; border-bottom: 1px solid var(--line); min-height: 86vh; display: flex; align-items: center; }
+  #grid { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .hero-fade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(8,10,13,.2) 0%, rgba(8,10,13,.55) 60%, var(--bg) 100%); pointer-events: none; }
+  .vignette { position:absolute; inset:0; pointer-events:none; box-shadow: inset 0 0 180px 40px rgba(0,0,0,.7); }
+  .hero .wrap { position: relative; z-index: 2; padding-block: 64px; width: 100%; }
+  .eyebrow { display: inline-flex; align-items: center; gap: 9px; font-family: var(--mono); font-size: .72rem; letter-spacing: .16em; text-transform: uppercase; color: var(--patina); border: 1px solid var(--line-2); border-radius: 999px; padding: 6px 13px; margin-bottom: 26px; background: rgba(13,16,21,.6); }
+  .eyebrow .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--patina); box-shadow: 0 0 10px var(--patina); animation: pulse 2.4s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity: .35; } }
+  .title { font-family: var(--display); font-weight: 800; font-size: clamp(3.1rem, 11vw, 7.4rem); line-height: .92; letter-spacing: -.03em; text-shadow: 0 0 60px rgba(239,106,36,.25); }
+  .title .ox { color: var(--rust); text-shadow: 0 0 40px rgba(239,106,36,.6); }
+  .title .cursor { color: var(--patina); -webkit-text-fill-color: var(--patina); animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .lede { font-size: clamp(1.08rem, 2.3vw, 1.4rem); color: #c3c9d4; max-width: 46ch; margin-top: 22px; }
+  .lede b { color: #fff; font-weight: 600; }
+  .cta { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 34px; }
+  .btn { font-family: var(--display); font-weight: 700; font-size: 1rem; text-decoration: none; padding: 14px 26px; border-radius: 10px; border: 1px solid transparent; display: inline-flex; align-items: center; gap: 10px; transition: transform .12s, box-shadow .2s, background .15s, border-color .15s; }
+  .btn-primary { background: var(--rust); color: #170b03; box-shadow: 0 0 0 rgba(239,106,36,0); }
+  .btn-primary:hover { background: var(--rust-hi); transform: translateY(-2px); box-shadow: 0 10px 40px -8px rgba(239,106,36,.6); }
+  .btn-ghost { border-color: var(--line-2); color: var(--fg); background: rgba(18,21,28,.7); }
+  .btn-ghost:hover { border-color: var(--patina); transform: translateY(-2px); box-shadow: 0 10px 40px -12px rgba(53,201,176,.5); }
+  .btn small { font-family: var(--mono); font-weight: 400; font-size: .72rem; opacity: .7; }
+
+  /* replay-tape HUD */
+  .tape { position: absolute; z-index: 2; right: max(20px, env(safe-area-inset-right,0px)); bottom: 24px; font-family: var(--mono); font-size: .76rem; color: var(--dim); background: rgba(8,10,13,.6); border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; line-height: 1.75; backdrop-filter: blur(4px); }
+  .tape .k { color: var(--patina); } .tape .f { color: var(--ember); } .tape b { color: var(--muted); font-weight: 500; }
+  @media (max-width: 760px){ .tape { display: none; } }
+
+  /* ---- stat strip ---- */
+  .stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 1px; background: var(--line); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  @media (max-width: 680px){ .stats { grid-template-columns: repeat(2,1fr); } }
+  .stat { background: var(--bg-2); padding: 26px 20px; }
+  .stat .n { font-family: var(--display); font-weight: 800; font-size: clamp(1.7rem,4vw,2.3rem); font-variant-numeric: tabular-nums; }
+  .stat .l { font-size: .82rem; color: var(--muted); margin-top: 4px; letter-spacing: .02em; }
+
+  /* ---- sections ---- */
+  section { padding-block: 84px; border-bottom: 1px solid var(--line); position: relative; }
+  .nameplate { display: inline-flex; align-items: center; gap: 12px; }
+  .nameplate::before { content:""; width: 34px; height: 3px; background: var(--rust); box-shadow: 0 0 12px var(--rust); }
+  .kicker { font-family: var(--mono); font-size: .74rem; letter-spacing: .18em; text-transform: uppercase; color: var(--rust); }
+  .h2 { font-size: clamp(1.8rem,4.4vw,2.7rem); font-weight: 800; margin-top: 14px; }
+  .sub { color: var(--muted); max-width: 62ch; margin-top: 13px; font-size: 1.02rem; }
+
+  .features { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-top: 44px; }
+  @media (max-width: 880px){ .features { grid-template-columns: repeat(2,1fr); } }
+  @media (max-width: 560px){ .features { grid-template-columns: 1fr; } }
+  .card { position: relative; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 26px; overflow: hidden; transition: border-color .18s, transform .18s; }
+  .card::after { content:""; position:absolute; inset:0 auto auto 0; width: 100%; height: 2px; background: linear-gradient(90deg, var(--rust), transparent); transform: scaleX(0); transform-origin: left; transition: transform .25s; }
+  .card:hover { border-color: var(--line-2); transform: translateY(-4px); }
+  .card:hover::after { transform: scaleX(1); }
+  .card .ic { width: 42px; height: 42px; border-radius: 10px; display: grid; place-items: center; background: linear-gradient(145deg, #241206, #170c06); color: var(--rust); border: 1px solid #3a2411; margin-bottom: 17px; }
+  .card .ic svg { width: 21px; height: 21px; }
+  .card h3 { font-size: 1.14rem; font-weight: 700; }
+  .card p { color: var(--muted); font-size: .94rem; margin: 10px 0 0; }
+  .card code { color: var(--patina); font-size: .88em; }
+
+  /* ---- code card ---- */
+  .code { background: var(--bg-2); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; box-shadow: 0 40px 80px -40px #000; min-width: 0; }
+  .code .top { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--line); background: #0b0d11; }
+  .code .top i { width: 11px; height: 11px; border-radius: 50%; display: inline-block; }
+  .code .top i:nth-child(1){ background:#ef6a2488;} .code .top i:nth-child(2){ background:#35c9b088;} .code .top i:nth-child(3){ background:#394152;}
+  .code .top span { margin-left: auto; font-family: var(--mono); font-size: .74rem; color: var(--dim); }
+  .code pre { margin: 0; padding: 20px; overflow-x: auto; font-family: var(--mono); font-size: .82rem; line-height: 1.75; }
+  .code code { white-space: pre; }
+  .c-com{color:#5f6675;} .c-key{color:var(--rust-hi);} .c-str{color:var(--patina);} .c-num{color:#e0bd72;} .c-fn{color:#86b5ff;}
+
+  /* ---- comparison ---- */
+  .cmp-wrap { margin-top: 40px; overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; background: var(--panel); }
+  table { width: 100%; border-collapse: collapse; font-size: .96rem; min-width: 460px; }
+  th, td { text-align: left; padding: 16px 22px; border-bottom: 1px solid var(--line); }
+  thead th { font-family: var(--mono); font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+  thead th:last-child { color: var(--rust); }
+  tbody tr:last-child td { border-bottom: 0; }
+  tbody tr:hover { background: rgba(255,255,255,.015); }
+  td.metric { color: var(--fg); }
+  td .num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  .ox-col { color: var(--rust-hi); font-weight: 600; }
+  .note { font-size: .82rem; color: var(--dim); margin-top: 15px; font-family: var(--mono); }
+
+  /* ---- downloads ---- */
+  .plats { display: grid; grid-template-columns: repeat(2,1fr); gap: 16px; margin-top: 44px; max-width: 720px; margin-inline: auto; }
+  @media (max-width: 680px){ .plats { grid-template-columns: 1fr; } }
+  .plat { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 28px; text-align: center; transition: border-color .15s; }
+  .plat:hover { border-color: var(--line-2); }
+  .plat .os { width: 30px; height: 30px; margin: 0 auto 12px; color: var(--muted); }
+  .plat h3 { font-size: 1.12rem; }
+  .plat .meta { font-family: var(--mono); font-size: .76rem; color: var(--dim); margin: 6px 0 18px; }
+  .plat a.dl { display: block; text-decoration: none; background: #1a1e27; border: 1px solid var(--line-2); border-radius: 9px; padding: 11px; color: var(--fg); font-weight: 700; font-family: var(--display); transition: border-color .15s, background .15s; }
+  .plat a.dl:hover { border-color: var(--rust); background: #21262f; }
+  .plat a.nightly { display:inline-block; margin-top: 11px; color: var(--muted); font-size: .85rem; text-decoration: none; font-family: var(--mono); }
+  .plat a.nightly:hover { color: var(--patina); }
+  .ship { font-size: .95rem; color: var(--muted); margin-top: 30px; text-align: center; max-width: 64ch; margin-inline: auto; }
+  .ship b { color: var(--patina); }
+
+  /* ---- footer ---- */
+  footer { padding-block: 48px 64px; }
+  .foot { display: flex; flex-wrap: wrap; gap: 20px 40px; justify-content: space-between; align-items: center; }
+  .foot nav { display: flex; gap: 24px; flex-wrap: wrap; }
+  .foot a { color: var(--muted); text-decoration: none; font-size: .9rem; }
+  .foot a:hover { color: var(--rust); }
+  .fine { color: var(--dim); font-size: .8rem; font-family: var(--mono); margin-top: 22px; }
+
+  /* determinism dividend */
+  .dividend { background: linear-gradient(180deg, var(--bg-2), var(--bg)); }
+  .div-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:40px; }
+  @media(max-width:860px){ .div-grid{ grid-template-columns:repeat(2,1fr);} }
+  @media(max-width:540px){ .div-grid{ grid-template-columns:1fr;} }
+  .dv { border:1px solid var(--line); border-left:3px solid var(--patina); border-radius:11px; padding:19px 21px; background:var(--panel); transition:transform .15s, border-color .15s; }
+  .dv:hover { transform:translateY(-3px); border-left-color:var(--rust); }
+  .dv .tag { font-family:var(--mono); font-size:.67rem; letter-spacing:.12em; text-transform:uppercase; color:var(--patina); }
+  .dv h4 { font-family:var(--display); font-weight:700; font-size:1.04rem; margin:6px 0 5px; }
+  .dv p { margin:0; color:var(--muted); font-size:.9rem; }
+
+  /* oxtool console */
+  .term { background:#090b0f; border:1px solid var(--line); border-radius:14px; overflow:hidden; margin-top:42px; box-shadow:0 40px 80px -40px #000; }
+  .term .top { display:flex; align-items:center; gap:8px; padding:12px 16px; border-bottom:1px solid var(--line); }
+  .term .top i{ width:11px;height:11px;border-radius:50%;display:inline-block; }
+  .term .top i:nth-child(1){background:#ef6a2488;}.term .top i:nth-child(2){background:#35c9b088;}.term .top i:nth-child(3){background:#394152;}
+  .term .top span{ margin-left:auto; font-family:var(--mono); font-size:.74rem; color:var(--dim); }
+  .term .tbody{ padding:10px 20px 16px; font-family:var(--mono); font-size:.84rem; }
+  .term .line{ display:grid; grid-template-columns:230px 1fr; gap:8px 20px; padding:9px 0; border-bottom:1px dashed #171c24; align-items:baseline; }
+  .term .line:last-child{ border-bottom:0; }
+  @media(max-width:640px){ .term .line{ grid-template-columns:1fr; gap:2px; } }
+  .term .cmd{ color:var(--ember); white-space:nowrap; } .term .cmd b{ color:var(--rust); font-weight:400; }
+  .term .desc{ color:var(--muted); min-width:0; }
+
+  /* modes */
+  .modes{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-top:42px; }
+  @media(max-width:880px){ .modes{ grid-template-columns:repeat(2,1fr);} }
+  @media(max-width:440px){ .modes{ grid-template-columns:1fr;} }
+  .mode{ border:1px solid var(--line); border-radius:12px; padding:21px; background:var(--panel); transition:transform .15s, border-color .15s; }
+  .mode:hover{ transform:translateY(-3px); border-color:var(--line-2); }
+  .mode .m-badge{ font-family:var(--mono); font-size:.65rem; text-transform:uppercase; letter-spacing:.11em; color:var(--rust); }
+  .mode h4{ font-family:var(--display); font-weight:700; font-size:1.04rem; margin:6px 0 0; }
+  .mode p{ margin:8px 0 0; color:var(--muted); font-size:.87rem; }
+
+  /* only in oxyde */
+  .uniq-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:40px; }
+  @media(max-width:860px){ .uniq-grid{ grid-template-columns:repeat(2,1fr);} }
+  @media(max-width:540px){ .uniq-grid{ grid-template-columns:1fr;} }
+  .uq{ display:flex; gap:13px; padding:18px 19px; border:1px solid var(--line); border-radius:11px; background:var(--panel); transition:transform .15s, border-color .15s; }
+  .uq:hover{ transform:translateY(-3px); border-color:var(--rust); }
+  .uq .mk{ flex:0 0 auto; width:28px; height:28px; border-radius:8px; display:grid; place-items:center; background:#1d1206; border:1px solid #3a2411; color:var(--ember); }
+  .uq .mk svg{ width:15px; height:15px; }
+  .uq h4{ font-family:var(--display); font-weight:700; font-size:.98rem; margin:1px 0 3px; }
+  .uq p{ margin:0; color:var(--muted); font-size:.86rem; }
+
+  /* hd / uhd presentation */
+  .hd { background: linear-gradient(180deg, var(--bg), var(--bg-2)); }
+  .hd .sub b, .hd p b { color: var(--fg); }
+  .chips { display:flex; flex-wrap:wrap; gap:10px; margin-top:26px; }
+  .chip { font-family:var(--mono); font-size:.8rem; padding:8px 14px; border-radius:999px; border:1px solid var(--line-2); color:var(--muted); background:var(--panel); }
+  .chip.on { color:#170b03; background:var(--ember); border-color:var(--ember); font-weight:600; }
+  .tiers { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:40px; }
+  @media(max-width:680px){ .tiers{ grid-template-columns:1fr; } }
+  .tier { border:1px solid var(--line); border-radius:13px; padding:22px; background:var(--panel); position:relative; overflow:hidden; }
+  .tier.hi { border-color:var(--patina-dim); }
+  .tier .tx { font-family:var(--display); font-weight:800; font-size:1.9rem; color:var(--fg); letter-spacing:-.02em; }
+  .tier.hi .tx { color:var(--patina); }
+  .tier .tn { font-family:var(--mono); font-size:.68rem; letter-spacing:.14em; text-transform:uppercase; color:var(--rust); margin-bottom:9px; }
+  .tier p { color:var(--muted); font-size:.88rem; margin:9px 0 0; }
+  .tier .f { font-family:var(--mono); font-size:.74rem; color:var(--dim); margin-top:11px; }
+  .pipe { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:16px; }
+  @media(max-width:680px){ .pipe{ grid-template-columns:1fr; } }
+  .step { border:1px solid var(--line); border-left:3px solid var(--rust); border-radius:11px; padding:16px 18px; background:var(--bg-2); }
+  .step .s { font-family:var(--mono); font-size:.68rem; letter-spacing:.12em; text-transform:uppercase; color:var(--ember); }
+  .step h4 { font-family:var(--display); font-weight:700; font-size:1rem; margin:5px 0 4px; }
+  .step p { color:var(--muted); font-size:.85rem; margin:0; }
+  .step code { color:var(--patina); font-size:.82em; }
+  .hdshot { margin-top:40px; border:1px solid var(--line); border-radius:14px; overflow:hidden; background:#0b0e13; box-shadow:0 40px 80px -40px #000; }
+  .hdshot img { display:block; width:100%; height:auto; }
+  .hdshot figcaption { padding:14px 18px; font-size:.86rem; color:var(--muted); border-top:1px solid var(--line); background:var(--bg-2); }
+  .hdshot figcaption b { color:var(--fg); font-weight:600; }
+
+  /* gallery */
+  .gal { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-top:40px; }
+  @media(max-width:560px){ .gal{ grid-template-columns:1fr; } }
+  .shot { position:relative; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:#07090c; }
+  .shot img { display:block; width:100%; height:100%; object-fit:cover; aspect-ratio:16/9; transition:transform .3s; }
+  .shot:hover img { transform:scale(1.04); }
+  .shot figcaption { position:absolute; left:0; right:0; bottom:0; padding:10px 13px; font-family:var(--mono); font-size:.73rem; color:#eef1f6; background:linear-gradient(transparent, rgba(8,10,13,.9)); }
+  .shot.feature { grid-column:1 / -1; }
+  .shot.feature img { aspect-ratio:21/9; }
+
+  .reveal { opacity: 0; transform: translateY(18px); transition: opacity .6s ease, transform .6s ease; }
+  .reveal.in { opacity: 1; transform: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    .reveal { opacity: 1; transform: none; }
+    #boot { display: none; }
+  }
+</style>
+
+<div id="boot" aria-hidden="true"><div class="bl">OXY<b>DE</b><span class="bar"></span></div><div class="scan"></div></div>
+<div id="meter"></div>
+
+<header>
+  <div class="wrap bar-row">
+    <div class="logo">OXY<b>DE</b></div>
+    <nav>
+      <a href="#features">Features</a>
+      <a href="#unique">Only in Oxyde</a>
+      <a href="#dividend">Determinism</a>
+      <a href="#oxtool">Tools</a>
+      <a href="wiki.html">Wiki</a>
+      <a href="#download">Download</a>
+      <a href="https://github.com/joed233/oxyde">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<div class="hero">
+  <canvas id="grid"></canvas>
+  <div class="hero-fade"></div>
+  <div class="vignette"></div>
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span>Rust · MUGEN &amp; Ikemen GO compatible</span>
+    <h1 class="title">OXY<span class="ox">DE</span><span class="cursor">_</span></h1>
+    <p class="lede">The fighting-game engine, rebuilt. It runs the <b>MUGEN</b> and <b>Ikemen GO</b> content you already have — then does what they never could.</p>
+    <div class="cta">
+      <a class="btn btn-primary" href="#download">Download <small>Windows · Linux</small></a>
+      <a class="btn btn-ghost" href="https://github.com/joed233/oxyde">View on GitHub</a>
+    </div>
+  </div>
+  <div class="tape" id="tape" aria-hidden="true">
+    <div><span class="k">replay</span> · <b>a match is a seed + two inputs/frame</b></div>
+    <div>seed <span class="k" id="t-seed">0x5741_5645</span> &nbsp; frame <span class="f" id="t-frame">000000</span></div>
+    <div>P1 <span id="t-p1">2A3F</span> &nbsp; P2 <span id="t-p2">00C1</span> &nbsp; <span class="k">ok ✓</span></div>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="n" data-to="160">0</div><div class="l">state controllers</div></div>
+  <div class="stat"><div class="n" data-to="281">0</div><div class="l">triggers</div></div>
+  <div class="stat"><div class="n" data-to="65536">0</div><div class="l">variable slots / bank</div></div>
+  <div class="stat"><div class="n" data-to="2944">0</div><div class="l">automated tests, green</div></div>
+</div>
+
+<section id="features">
+  <div class="wrap">
+    <div class="nameplate"><span class="kicker">What it is</span></div>
+    <h2 class="h2 reveal">Compatible by design. Better by choice.</h2>
+    <p class="sub reveal">Oxyde reads the formats a thousand authors already write — then adds the things the old engines never had.</p>
+    <div class="features">
+      <div class="card reveal"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h10"/></svg></div><h3>Runs your roster</h3><p>SFF, AIR, CNS, CMD, ZSS, glTF and WebM — loaded straight from the characters and stages you own, even from inside <code>.zip</code> and <code>.rar</code> archives. No unpacking, no re-authoring.</p></div>
+      <div class="card reveal"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6l-4 6 4 6M16 6l4 6-4 6"/></svg></div><h3>The FUSE language</h3><p>A readable, modern script with real boolean logic and the first native command syntax in the family. Transpiles CNS and ZSS to FUSE, verified by re-fighting each conversion.</p></div>
+      <div class="card reveal"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12h4l2 5 4-10 2 5h4"/></svg></div><h3>Deterministic core</h3><p>A match is a seed and two inputs a frame — nothing else. That one fact buys rollback netplay, frame-perfect replays, spectating and tournaments.</p></div>
+      <div class="card reveal"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 16l6-6 4 4 8-8M3 20h18"/></svg></div><h3>2.5D depth</h3><p>Lit glTF stages with true depth and occlusion, plus a belt-scroll brawler mode that runs the street horizontally — or vertically.</p></div>
+      <div class="card reveal"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M7 9l2 2-2 2M12 13h4"/></svg></div><h3>Tools that read the data</h3><p>An LSP that completes and lints your scripts, and <code>oxtool</code> to convert, audit, diff, repair and replay any character from the command line.</p></div>
+      <div class="card reveal"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/></svg></div><h3>Everywhere</h3><p>One Rust codebase for Windows and Linux. It loads the system libraries it needs at run time, so a single Linux build keeps running across distro upgrades instead of breaking.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="unique">
+  <div class="wrap">
+    <div class="nameplate"><span class="kicker">Found nowhere else</span></div>
+    <h2 class="h2 reveal">Only in Oxyde.</h2>
+    <p class="sub reveal">Compatibility is the floor. Everything below exists in Oxyde and in no other engine in the MUGEN family — not in WinMUGEN, not in Ikemen GO.</p>
+    <div class="uniq-grid">
+      <div class="uq reveal"><div class="mk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6l-4 6 4 6M16 6l4 6-4 6"/></svg></div><div><h4>The FUSE language</h4><p>The <b>Flexible User State Expression</b> language — the family's first native script with real boolean logic, and the first native command syntax, instead of a separate INI.</p></div></div>
+      <div class="uq reveal"><div class="mk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h10M4 12h16M4 17h7"/><path d="M17 15l3 3-3 3" transform="translate(0 -9)"/></svg></div><div><h4>Three languages in, FUSE out</h4><p>Write FUSE natively, or bring CNS and ZSS — the transpiler lifts either into readable FUSE, proven byte-for-behavior by re-fighting it.</p></div></div>
+      <div class="uq reveal"><div class="mk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M5 8l7-5 7 5M5 16l7 5 7-5"/></svg></div><div><h4>Universal mechanics</h4><p>Chip, tech, burst, push-block, parry — with an absorb layer — and guard-break, added for every character by the engine, whether its author wrote them or not.</p></div></div>
+      <div class="uq reveal"><div class="mk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 8h10M7 12h6"/><circle cx="17" cy="16" r="3"/><path d="M17 14v2l1 1"/></svg></div><div><h4>Universal tag</h4><p>A tag button that works for any character — TagIn / TagOut wired into the engine, no author support required.</p></div></div>
+      <div class="uq reveal"><div class="mk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="16" r="3"/><path d="M11 8h5v5"/></svg></div><div><h4>Tournament rulesets</h4><p>A base mode plus a stack of sparse deltas — the competitive knobs the engine already reads, declared as data and proven against the empty stack.</p></div></div>
+      <div class="uq reveal"><div class="mk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="8" height="8" rx="1"/><rect x="13" y="12" width="8" height="8" rx="1"/><path d="M11 8h2M13 16h-2"/></svg></div><div><h4>Cross-architecture determinism</h4><p>An x86 PC and an ARM handheld replay the same match, bit for bit — proven on real hardware, not just the same OS.</p></div></div>
+      <div class="uq reveal"><div class="mk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 12h18"/><path d="M8 9h2"/></svg></div><div><h4>HD / UHD sprite tier</h4><p>Upscale a character's own art 2× or 4× and repack it as a sidecar — same geometry and hit boxes, sharper pixels, zero determinism cost.</p></div></div>
+      <div class="uq reveal"><div class="mk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M3 8h18M7 12h2M11 12h6"/></svg></div><div><h4>A presentation filter stack</h4><p>Nearest, sharp, smooth, scanlines, CRT and LCD — a finishing look the simulation and checksum never see.</p></div></div>
+      <div class="uq reveal"><div class="mk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18"/><path d="M6 12v5M18 12v5M12 7v10"/><circle cx="12" cy="6" r="1.5"/></svg></div><div><h4>Knuckle Up brawler</h4><p>A full belt-scroll beat-'em-up mode — waves, pickups, bosses and campaigns — running on the same deterministic engine.</p></div></div>
+      <div class="uq reveal"><div class="mk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 18V6M20 18V6M4 12h7l-2-2m2 2l-2 2"/><path d="M13 12h7"/></svg></div><div><h4>Mid-match stage transitions</h4><p>Knock a cornered opponent clean out of the arena and the fight continues — seamlessly, in the next stage, without a reload.</p></div></div>
+      <div class="uq reveal"><div class="mk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 4v6c0 4-3 6-8 8-5-2-8-4-8-8V7z"/><path d="M9 12l2 2 4-4"/></svg></div><div><h4>Bring your own character</h4><p>Pack any fighter into one content-verified file — digest-checked on load, tamper-evident, ready to share.</p></div></div>
+      <div class="uq reveal"><div class="mk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><div><h4>Boots on empty</h4><p>UI and common states are embedded in the binary; the engine runs with zero author content, and every default is overridable.</p></div></div>
+      <div class="uq reveal"><div class="mk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="2"/><path d="M8.5 8.5a5 5 0 0 0 0 7M15.5 8.5a5 5 0 0 1 0 7M5.5 5.5a9 9 0 0 0 0 13M18.5 5.5a9 9 0 0 1 0 13"/></svg></div><div><h4>Corrosion — play with no content</h4><p>The engine on one machine, the picture on another. Join a live match holding none of it: an 18 MB binary in an empty folder plays the host's whole archive — chars, stages and all — your side sending only input.</p></div></div>
+      <div class="uq reveal"><div class="mk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v11M8 10l4 4 4-4"/><path d="M5 20h14"/></svg></div><div><h4>Bring your own character</h4><p>Pick a fighter your opponent doesn't have and the match still happens: their build pulls it over the connection, verifies it by content hash and plays. Opt-in on both sides, sandboxed data not code, and because the engine is deterministic, once both hold the same bytes the fight is identical.</p></div></div>
+      <div class="uq reveal"><div class="mk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9l3 3-3 3M13 15h3"/></svg></div><div><h4>One portable binary</h4><p>No runtime to install and nothing to fetch. It resolves its system libraries at run time, so a single build survives a distro upgrade instead of failing to launch.</p></div></div>
+      <div class="uq reveal"><div class="mk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 10l2 2-2 2M12 14h4"/></svg></div><div><h4>oxtool — engine on the CLI</h4><p>One binary that reads the same data the engine runs: convert, audit, diff, repair, replay and render any character, all scriptable, all deterministic.</p></div></div>
+      <div class="uq reveal"><div class="mk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v11H7l-3 3z"/><path d="M8 10h8M8 13h5"/></svg></div><div><h4>A FUSE language server</h4><p>Completion, hovers and live lint for FUSE in your editor — an LSP that understands the engine's own language.</p></div></div>
+      <div class="uq reveal"><div class="mk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M16 16l4 4"/><path d="M11 8v3l2 1"/></svg></div><div><h4>The engine answers about itself</h4><p><code>oxtool ask</code> — retrieval over the engine's own documentation and a casebook of real faults, grounded in shipped text.</p></div></div>
+      <div class="uq reveal"><div class="mk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h9l4 4v14H6z"/><circle cx="12" cy="13" r="2.5"/><path d="M14 15l2 2"/></svg></div><div><h4>Content, checked against its claims</h4><p>The engine confirms every character is what its files say it is — a <code>.cns</code> renamed <code>.fuse</code>, a <code>.def</code> pointing at a file that isn't there, two languages in one file — named at load, before it ships wrong. Detection only; nothing is touched.</p></div></div>
+      <div class="uq reveal"><div class="mk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 3h7l5 5v13H7z" transform="translate(-1 0)"/><path d="M7 12l2 2 4-4"/></svg></div><div><h4>Docs verified like code</h4><p><code>oxtool docs</code> re-derives every number and claim in the reference from the code itself, so the manual can't drift from the engine.</p></div></div>
+      <div class="uq reveal"><div class="mk"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.3 6.9L21 11l-6.7 2.1L12 20l-2.3-6.9L3 11l6.7-2.1z"/></svg></div><div><h4>Rusty Gear — assisted authoring</h4><p>FUSE authoring, assisted: the LSP, the always-exact transpiler and compiler, retrieval over the docs and fault casebook, an optional local model for the open-ended questions, and an <b>MCP server</b> that hands every one of those read-only tools to your own AI assistant.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="dividend" class="dividend">
+  <div class="wrap">
+    <div class="nameplate"><span class="kicker">The unfair advantage</span></div>
+    <h2 class="h2 reveal">A match is two <code>u16</code> a frame.</h2>
+    <p class="sub reveal">Oxyde's simulation is a pure function: the same seed and the same inputs produce the same fight, on every machine, every time. Nothing else in the family is built this way — and it's where Oxyde's rarest features come from, for free.</p>
+    <div class="div-grid">
+      <div class="dv reveal"><div class="tag">netplay</div><h4>Rollback, done right</h4><p>Only inputs cross the wire — kilobytes a match. Predict, re-simulate, reconcile; no desyncs to chase.</p></div>
+      <div class="dv reveal"><div class="tag">replays</div><h4>Frame-perfect tape</h4><p>A whole match stored as its inputs. Tiny files that reproduce the fight exactly, forever.</p></div>
+      <div class="dv reveal"><div class="tag">spectate</div><h4>Spectate live</h4><p>A watcher is just a peer running the same sim from the players' inputs — kilobits a second, zero drift.</p></div>
+      <div class="dv reveal"><div class="tag">tournaments</div><h4>Verifiable, not fakeable</h4><p>Re-run a submitted tape and check the end-state. A score that can't be faked.</p></div>
+      <div class="dv reveal"><div class="tag">training</div><h4>Rewind &amp; fork</h4><p>Restore any past frame from a snapshot and re-simulate — frame-step, save-state, and replay your inputs against a recording dummy.</p></div>
+      <div class="dv reveal"><div class="tag">tooling</div><h4>A tape is a bug report</h4><p>Re-run any match, or rewind the frames right before it went wrong — a debugger for your fights.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="compat">
+  <div class="wrap">
+    <div class="nameplate"><span class="kicker">Measured, not claimed</span></div>
+    <h2 class="h2 reveal">Parity with the field — read from its own source.</h2>
+    <p class="sub reveal">Every number below was counted against Ikemen GO's source, not either project's marketing. Where Oxyde leads, it leads by an amount you can check.</p>
+    <div class="cmp-wrap reveal">
+      <table>
+        <thead><tr><th>Capability</th><th>Ikemen GO</th><th>Oxyde</th></tr></thead>
+        <tbody>
+          <tr><td class="metric">State controllers</td><td class="num">158</td><td class="num ox-col">160</td></tr>
+          <tr><td class="metric">Triggers</td><td class="num">267</td><td class="num ox-col">281</td></tr>
+          <tr><td class="metric">Variable slots per bank</td><td class="num">unbounded *</td><td class="num ox-col">65,536</td></tr>
+          <tr><td class="metric">Command syntax in the language</td><td class="num">INI only</td><td class="num ox-col">native</td></tr>
+          <tr><td class="metric">Reference generated from the engine</td><td class="num">—</td><td class="num ox-col">yes</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">* A memory-bounded bank is the feature: 65,536 live slots means a typo can't quietly allocate two billion.</p>
+  </div>
+</section>
+
+<section id="fuse">
+  <div class="wrap">
+    <div class="nameplate"><span class="kicker">The language</span></div>
+    <h2 class="h2 reveal">CNS, modernized — and reversible.</h2>
+    <p class="sub reveal">FUSE — the <b>Flexible User State Expression</b> language — is Oxyde's native language. Point the transpiler at any MUGEN or Ikemen character and it comes back as readable FUSE, byte-for-behavior identical — proven by re-fighting it, not by hoping. The reference fighter, Arroyo, is written in it.</p>
+    <div class="code reveal" style="margin-top:36px;max-width:760px" aria-label="A FUSE command and state">
+      <div class="top"><i></i><i></i><i></i><span>arroyo.cmd.fuse</span></div>
+<pre><code><span class="c-com">// The first real command syntax in the MUGEN family.</span>
+<span class="c-key">commands</span> (time: <span class="c-num">15</span>, buffer: <span class="c-num">1</span>) {
+    rio     = D, DF, F, D, DF, F, c
+    cyclone = D, DB, B, a
+}
+
+<span class="c-key">state</span> -1 {
+    <span class="c-key">if</span> command == <span class="c-str">"rio"</span> &amp;&amp; power &gt;= <span class="c-num">3000</span>
+        &amp;&amp; (ctrl || stateno <span class="c-key">in</span> [<span class="c-num">200</span>, <span class="c-num">230</span>] &amp;&amp; movecontact) {
+        <span class="c-fn">changestate</span> <span class="c-num">3000</span>
+    }
+}</code></pre>
+    </div>
+  </div>
+</section>
+
+<section id="oxtool">
+  <div class="wrap">
+    <div class="nameplate"><span class="kicker">The toolbox</span></div>
+    <h2 class="h2 reveal">oxtool — the engine, on the command line.</h2>
+    <p class="sub reveal">One binary that reads the same data the engine runs. Convert a roster, prove a character works, repair a broken one, record a match to video — all scriptable, all deterministic.</p>
+    <div class="term reveal">
+      <div class="top"><i></i><i></i><i></i><span>oxtool 0.37.0</span></div>
+      <div class="tbody">
+        <div class="line"><span class="cmd"><b>$</b> oxtool fuse</span><span class="desc">transpile any CNS/ZSS character to readable FUSE — or a whole roster, verified</span></div>
+        <div class="line"><span class="cmd"><b>$</b> oxtool moves --try</span><span class="desc">perform every move headlessly; report which fire, which connect, at what range and damage</span></div>
+        <div class="line"><span class="cmd"><b>$</b> oxtool audit</span><span class="desc">score how much of a character actually works, measured inside the engine</span></div>
+        <div class="line"><span class="cmd"><b>$</b> oxtool verify</span><span class="desc">load every character and stage in a folder; report what fails and why</span></div>
+        <div class="line"><span class="cmd"><b>$</b> oxtool fusediff</span><span class="desc">catch a lossy conversion statically, before it ever reaches the ring</span></div>
+        <div class="line"><span class="cmd"><b>$</b> oxtool normalize / revert</span><span class="desc">repair common faults, and undo any change — every fix backs up once, reversible</span></div>
+        <div class="line"><span class="cmd"><b>$</b> oxtool replay video</span><span class="desc">render a match tape to WebM (AV1, built in) or MP4 (via ffmpeg), with sound</span></div>
+        <div class="line"><span class="cmd"><b>$</b> oxtool shot</span><span class="desc">render any game screen — title, select, versus, a fight — to a PNG, headlessly</span></div>
+        <div class="line"><span class="cmd"><b>$</b> oxtool ask</span><span class="desc">ask the engine about itself — retrieval over the documentation and the fault casebook</span></div>
+        <div class="line"><span class="cmd"><b>$</b> oxtool pack / unpack</span><span class="desc">bundle a character into one content-verified file for safe sharing</span></div>
+        <div class="line"><span class="cmd"><b>$</b> oxtool docs</span><span class="desc">re-derive every number and claim in the reference from the code itself</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="modes">
+  <div class="wrap">
+    <div class="nameplate"><span class="kicker">Ways to play</span></div>
+    <h2 class="h2 reveal">More than a versus screen.</h2>
+    <div class="modes">
+      <div class="mode reveal"><div class="m-badge">1v1 · teams</div><h4>Versus &amp; Arcade</h4><p>The classic ladder, plus teams, turns, simul and tag — every MUGEN match type.</p></div>
+      <div class="mode reveal"><div class="m-badge">beat-'em-up</div><h4>Knuckle Up</h4><p>A belt-scroll brawler — waves, pickups, bosses and campaigns, with Story, Arcade, Survival, Boss Rush and Last Stand run types.</p></div>
+      <div class="mode reveal"><div class="m-badge">watch</div><h4>Spectate &amp; replays</h4><p>Watch a lobby live, or re-watch any match from its tiny replay tape.</p></div>
+      <div class="mode reveal"><div class="m-badge">lab</div><h4>Training</h4><p>Frame-step, save-states, input history and a recording dummy — a real debugger for your execution.</p></div>
+      <div class="mode reveal"><div class="m-badge">story</div><h4>Story mode</h4><p>Branching story arcs in a declarative format, plus storyboards and per-character endings — authored as data.</p></div>
+      <div class="mode reveal"><div class="m-badge">stage</div><h4>Stage transitions</h4><p>Launch a cornered opponent out of the arena and the fight continues — seamlessly, in the next stage, mid-match.</p></div>
+      <div class="mode reveal"><div class="m-badge">online</div><h4>Rollback netplay</h4><p>Fight 1v1 across the wire with rollback netcode, or team up in local co-op.</p></div>
+      <div class="mode reveal"><div class="m-badge">bonus</div><h4>Bonus stages</h4><p>Oxyde-original between-round challenges — breakable props and targets, authored as content.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="hd" class="hd">
+  <div class="wrap">
+    <div class="nameplate"><span class="kicker">Presentation</span></div>
+    <h2 class="h2 reveal">Sharper than the source.</h2>
+    <p class="sub reveal">The <b>HD / UHD sprite tier</b> builds an upscaled sprite set from a character's own frames and the engine draws from it while keeping the original geometry — so hit boxes, axes and timing stay exactly as the author drew them. The same frame, at each tier:</p>
+    <figure class="hdshot reveal">
+      <img src="img/hd_uhd.png" alt="Kung Fu Man's Kung Fu Palm at three tiers: blocky base 1x, smooth HD 2x, crisp UHD 4x" loading="lazy">
+      <figcaption>One frame — <b>Kung Fu Man</b>, the free MUGEN sample fighter — exported, super-resolved, and repacked as a sidecar. Left: the original sprite. Middle: the 2× HD pack. Right: the 4× UHD pack. The on-screen footprint is identical; only the texture density changes.</figcaption>
+    </figure>
+    <p class="sub reveal" style="margin-top:34px">Switch tiers live, per match:</p>
+    <div class="tiers reveal">
+      <div class="tier"><div class="tn">sprite_hd = off</div><div class="tx">1×</div><p>The original sprites, drawn exactly as shipped. Always the fallback — per sprite, so a partial pack is fine.</p><div class="f">base .sff</div></div>
+      <div class="tier hi"><div class="tn">sprite_hd = hd</div><div class="tx">2×</div><p>A sidecar at double resolution. Truecolour detail where the base art had flat palette fills, same on-screen footprint.</p><div class="f">arroyo.hd2.sff</div></div>
+      <div class="tier hi"><div class="tn">sprite_hd = uhd</div><div class="tx">4×</div><p>A quadruple-resolution sidecar for 4K panels — the sharpest the art can carry, with geometry untouched.</p><div class="f">arroyo.hd4.sff</div></div>
+    </div>
+    <p class="sub reveal" style="margin-top:34px">A pack is built in three steps — two are <code style="color:var(--patina)">oxtool</code>, the middle one your upscaler of choice:</p>
+    <div class="pipe reveal">
+      <div class="step"><div class="s">1 · export</div><h4>Bake the frames</h4><p><code>oxtool sprites export</code> writes every sprite to PNG with the character's real palette applied.</p></div>
+      <div class="step"><div class="s">2 · upscale</div><h4>Super-resolution</h4><p>Upscale the PNGs 2× or 4× — RGB and alpha handled separately so silhouettes never halo.</p></div>
+      <div class="step"><div class="s">3 · pack</div><h4>Repack as a sidecar</h4><p><code>oxtool sprites pack</code> verifies every frame is exactly N× and writes an SFF v2 beside the base.</p></div>
+    </div>
+    <p class="sub reveal" style="margin-top:34px">On top, a stack of output <b>filters</b> finishes the look — entirely presentational:</p>
+    <div class="chips reveal">
+      <span class="chip">Nearest</span><span class="chip">Sharp</span><span class="chip on">Smooth</span><span class="chip">Scanlines</span><span class="chip">CRT</span><span class="chip">LCD</span>
+    </div>
+    <p class="note">Entirely presentational — the simulation, the checksum and netplay never see it. HD stays safe for rollback, replays and tournaments.</p>
+  </div>
+</section>
+
+<section id="gallery">
+  <div class="wrap">
+    <div class="nameplate"><span class="kicker">Rendered in-engine</span></div>
+    <h2 class="h2 reveal">See it running.</h2>
+    <p class="sub reveal">Every frame below was produced headlessly by the engine itself — the same deterministic path that records replays and exports video. This is the reference fighter, Arroyo, on the Oxyde Battle Ring.</p>
+    <div class="gal">
+      <figure class="shot feature reveal"><img src="img/fight.png" alt="Arroyo fighting on the Oxyde Battle Ring, rendered in-engine" loading="lazy"><figcaption>A match — Arroyo on the Oxyde Battle Ring</figcaption></figure>
+      <figure class="shot reveal"><img src="img/title.png" alt="The Oxyde title / attract screen" loading="lazy"><figcaption>Title screen</figcaption></figure>
+      <figure class="shot reveal"><img src="img/select.png" alt="The Oxyde character-select screen" loading="lazy"><figcaption>Character select</figcaption></figure>
+      <figure class="shot reveal"><img src="img/fight2.png" alt="A second frame of a match in motion" loading="lazy"><figcaption>A match in motion</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<style>
+  #faq .faqwrap{ max-width:820px; margin:28px auto 0; display:flex; flex-direction:column; gap:10px; }
+  #faq details{ border:1px solid var(--line, #1b2029); border-radius:12px; background:rgba(255,255,255,.02); overflow:hidden; }
+  #faq summary{ cursor:pointer; list-style:none; padding:16px 18px; font-family:var(--f-display,"Oxanium",sans-serif); font-weight:600; font-size:clamp(15px,2.4vw,17px); display:flex; justify-content:space-between; align-items:center; gap:12px; }
+  #faq summary::-webkit-details-marker{ display:none; }
+  #faq summary::after{ content:"+"; color:var(--accent,#e2673a); font-size:20px; line-height:1; transition:transform .2s; }
+  #faq details[open] summary::after{ transform:rotate(45deg); }
+  #faq details[open] summary{ border-bottom:1px solid var(--line,#1b2029); }
+  #faq .ans{ padding:14px 18px 18px; color:var(--muted,#9aa0aa); line-height:1.6; font-size:15px; }
+  #faq .ans b{ color:var(--fg,#e9edf2); font-weight:600; }
+</style>
+<section id="faq">
+  <div class="wrap">
+    <div class="nameplate"><span class="kicker">Questions</span></div>
+    <h2 class="h2 reveal">Answers before you download.</h2>
+    <p class="sub reveal">The things people ask first — answered plainly. The full FAQ and a format-by-format compatibility table live in the docs.</p>
+    <div class="faqwrap reveal">
+      <details><summary>Can it run my M.U.G.E.N characters?</summary><div class="ans"><b>Yes — directly, with no conversion and no import step.</b> Your characters' <code>.def</code>, <code>.cns</code>, <code>.cmd</code>, <code>.air</code>, <code>.sff</code>, <code>.snd</code> and <code>.act</code> files load exactly as they are. Point Oxyde at your MUGEN install and it reads your <code>select.def</code> and plays the whole roster — and the same folder still works in MUGEN afterward.</div></details>
+      <details><summary>Which M.U.G.E.N versions? Does it run Ikemen GO content?</summary><div class="ans">Every version with content — <b>DOS MUGEN, WinMUGEN, 1.0 and 1.1</b> — with all <b>93</b> WinMUGEN state controllers executed and SFF v1 and v2 read. <b>Ikemen GO content works too:</b> ZSS is read in full, every Ikemen trigger and controller is recognised, and Ikemen's glTF 3D stage backdrops draw. So most Ikemen characters and stages drop in — the one thing it doesn't take is Ikemen's Lua-scripted screenpack <i>layout</i>.</div></details>
+      <details><summary>Will my characters play the same? Do I have to convert anything?</summary><div class="ans">Same files, no conversion. Behaviour is pinned to the MUGEN manual, with the original engine (under Wine) as the tie-breaker and the thousand characters on disk as the check — it's <b>measured, not assumed</b>. One difference runs in your favour: WinMUGEN silently drops a mistyped trigger, so a move that never worked right there can start working here. You never have to learn a new format; FUSE, Oxyde's own language, is optional.</div></details>
+      <details><summary>Why bother? What do I actually gain?</summary><div class="ans">A 25-year-old engine with its age taken away. You keep every character, stage and screenpack; you gain the engine around them — <b>online that actually works</b> (rollback, no desync), <b>replays and tournaments you can trust</b> (a saved match replays bit-for-bit), <b>modern HD/UHD displays</b>, a toolkit that audits, repairs and converts content <i>for</i> you, and new ways to play. If it runs in MUGEN today, it runs in Oxyde today — and all of that comes with it for free.</div></details>
+      <details><summary>What can Oxyde do that M.U.G.E.N and Ikemen can't?</summary><div class="ans">One thing underpins the rest: its simulation is <b>deterministic</b> — two machines produce a bit-for-bit identical match, <i>even across different CPUs</i> (proven x86 vs ARM on real hardware). That unlocks rollback netplay, exact spectating and replays, <b>bring-your-own-characters</b> (send a fighter your opponent lacks, over the connection), <b>Corrosion</b> (play holding <i>none</i> of the content), universal modern mechanics on every character, HD/UHD tiers, built-in brawler modes, and <code>oxtool</code> — a scriptable headless engine with no equivalent in the MUGEN/Ikemen world.</div></details>
+      <details><summary>Can I play online with someone who has different characters?</summary><div class="ans"><b>Yes.</b> Pick a fighter they don't own and their build pulls it over the connection, verifies it by content hash, and the match plays instead of being refused — no "we both need the same roster." Opt-in on both sides, and it transfers sandboxed data, never code. <b>Or</b>, with <b>Corrosion</b>, a friend with an empty ~18&nbsp;MB binary joins your game and plays your whole archive, sending only button presses.</div></details>
+      <details><summary>I run tournaments / I stream — anything for me?</summary><div class="ans">This is where determinism pays off most. Every match saves as a replay that plays back <b>bit-for-bit</b>, so results are verifiable and brackets can be re-watched or audited afterward. Spectating is exact, not a separate re-broadcast, and tournament rulesets — rounds, timers, damage — are plain data you can version and share. A disputed round is settled by replaying it.</div></details>
+      <details><summary>My characters are broken or half-finished. Now what?</summary><div class="ans">They still load — and Oxyde tells you <i>why</i> they misbehave instead of just crashing. <code>oxtool audit</code> scores how much of a character works and points at the faults, <code>oxtool validate</code> flags files that aren't what they claim, and <code>oxtool repair</code> fixes common breakage — every repair backs up once and <code>oxtool revert</code> undoes it. A character that only half-ran in MUGEN often runs further here.</div></details>
+      <details><summary>Is it free? What platforms? Still being worked on?</summary><div class="ans"><b>Freeware</b> for non-commercial use — and everything you make is yours. Runs on <b>Linux and Windows</b> as a single portable binary (and on ARM), with <b>no graphics card required</b>, and it boots and plays the moment it unzips. It's at v0.37.0 and <b>actively developed</b>, with the determinism guarantee held fixed so nothing that already works can quietly break.</div></details>
+    </div>
+  </div>
+</section>
+
+<section id="download">
+  <div class="wrap">
+    <div class="nameplate"><span class="kicker">Get it · free</span></div>
+    <h2 class="h2 reveal">Download Oxyde — v0.37.0</h2>
+    <p class="sub reveal">Freeware, in the tradition of the engines that came before. Each build boots and plays the moment it unzips — the engine, a default screenpack, the reference fighter and stage.</p>
+    <div class="plats">
+      <div class="plat reveal">
+        <svg class="os" viewBox="0 0 24 24" fill="currentColor"><path d="M3 5.5 10 4.5v7H3zM11 4.3 21 3v8.5H11zM3 12.5h7v7l-7-1zM11 12.5h10V21l-10-1.3z"/></svg>
+        <h3>Windows</h3><div class="meta">x86-64 · .zip · Windows 10 / 11</div>
+        <a class="dl" href="https://github.com/joed233/oxyde/releases/latest/download/oxyde-0.37.0-windows-x64.zip">Download</a>
+        <a class="nightly" href="https://github.com/joed233/oxyde/releases">all releases →</a>
+      </div>
+      <div class="plat reveal">
+        <svg class="os" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c2 0 3 2 3 4 0 1-.4 2-.4 3 .6.8 2.4 3 2.4 7 0 3-1 5-1.5 5s-.8-.6-1.5-.6-1.3 1.2-2.5 1.2-1.9-1.2-2.5-1.2-1 .6-1.5.6S6 21 6 18c0-4 1.8-6.2 2.4-7 0-1-.4-2-.4-3 0-2 1-4 3-4z"/></svg>
+        <h3>Linux</h3><div class="meta">x86-64 · .zip · glibc 2.34+ (Ubuntu 22.04+)</div>
+        <a class="dl" href="https://github.com/joed233/oxyde/releases/latest/download/oxyde-0.37.0-linux-x86_64.zip">Download</a>
+        <a class="nightly" href="https://github.com/joed233/oxyde/releases">all releases →</a>
+      </div>
+      <div class="plat reveal">
+        <svg class="os" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 3 6.5v11L12 22l9-4.5v-11L12 2zm0 2.3 6.1 3L12 10.3 5.9 7.3 12 4.3zM5 9l6 3v7.3L5 16.3V9zm8 10.3V12l6-3v7.3l-6 3z"/></svg>
+        <h3>Content Pack</h3><div class="meta">any OS · .zip · optional</div>
+        <a class="dl" href="https://github.com/joed233/oxyde/releases/latest/download/oxyde-0.37.0-content-pack.zip">Download</a>
+        <a class="nightly" href="https://github.com/joed233/oxyde/releases">all releases →</a>
+      </div>
+    </div>
+    <p class="ship reveal">Every build ships playable with zero author content: the engine, a default screenpack, the reference fighter <b>Arroyo</b>, and the <b>Oxyde Battle Ring</b>. Drop your characters into <code>chars/</code> and go.</p>
+    <p class="ship reveal">Want the full showcase? Add the <b>Content Pack</b> on top of either engine — one download, any OS — for all <b>19 Oxyde stages</b>, the <b>15 bonus trials</b> (they switch on between matches), and the <b>Knuckle Up</b> props and demo run.</p>
+    <div class="nameplate reveal" style="margin-top:36px"><span class="kicker">Inside the Content Pack</span></div>
+    <p class="sub reveal">Every frame rendered in-engine — nineteen arenas, fifteen bonus trials, and the four-player Knuckle Up co-op mode.</p>
+    <div class="gal reveal" style="margin-top:26px">
+      <figure class="shot"><img src="img/pack_lava.png" alt="Arroyo fighting on the Lava Fortress arena" loading="lazy"><figcaption>Lava Fortress · one of 19 arenas</figcaption></figure>
+      <figure class="shot"><img src="img/pack_neon.png" alt="Arroyo on the Neon Rain arena" loading="lazy"><figcaption>Neon Rain</figcaption></figure>
+      <figure class="shot"><img src="img/pack_glacier.png" alt="Arroyo on the Glacier Aurora arena" loading="lazy"><figcaption>Glacier Aurora</figcaption></figure>
+      <figure class="shot"><img src="img/pack_rust.png" alt="Arroyo on the Rust Cathedral arena" loading="lazy"><figcaption>Rust Cathedral</figcaption></figure>
+      <figure class="shot"><img src="img/pack_infernal.png" alt="Arroyo on the Infernal Pit arena" loading="lazy"><figcaption>Infernal Pit</figcaption></figure>
+      <figure class="shot"><img src="img/pack_storm.png" alt="Arroyo on the Storm Galleon arena" loading="lazy"><figcaption>Storm Galleon</figcaption></figure>
+      <figure class="shot"><img src="img/pack_ku.png" alt="The Knuckle Up four-player hero select screen" loading="lazy"><figcaption>Knuckle Up · four-player hero select</figcaption></figure>
+      <figure class="shot"><img src="img/pack_bonus.png" alt="The Oxyde Crusher Yard bonus trial" loading="lazy"><figcaption>Crusher Yard · one of 15 bonus trials</figcaption></figure>
+      <figure class="shot"><img src="img/pack_titan.png" alt="The Oxyde Titan bonus trial — a reactor meltdown" loading="lazy"><figcaption>Oxyde Titan · reactor meltdown</figcaption></figure>
+      <figure class="shot"><img src="img/pack_hive.png" alt="The Hive Nexus bonus trial" loading="lazy"><figcaption>Hive Nexus</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <div class="logo">OXY<b>DE</b></div>
+      <nav>
+        <a href="https://github.com/joed233/oxyde">GitHub</a>
+        <a href="wiki.html">Wiki</a>
+        <a href="https://github.com/joed233/oxyde/releases">Releases</a>
+      </nav>
+    </div>
+    <p class="fine">Oxyde — a MUGEN/Ikemen-compatible fighting engine, built in Rust. Freeware. MUGEN and Ikemen GO are named for compatibility only.</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // --- boot ---
+  if (reduce) { document.body.classList.add('booted'); }
+  else {
+    window.addEventListener('load', function(){ setTimeout(function(){ document.body.classList.add('booted'); }, 1150); });
+    setTimeout(function(){ document.body.classList.add('booted'); }, 2600); // safety
+  }
+
+  // --- scroll meter ---
+  var meter = document.getElementById('meter');
+  function onScroll(){
+    var h = document.documentElement, max = h.scrollHeight - h.clientHeight;
+    meter.style.width = (max > 0 ? (h.scrollTop / max * 100) : 0) + '%';
+  }
+  document.addEventListener('scroll', onScroll, {passive:true}); onScroll();
+
+  // --- reveal on scroll ---
+  var io = new IntersectionObserver(function(es){
+    es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
+  }, {threshold: .14});
+  document.querySelectorAll('.reveal').forEach(function(el){ io.observe(el); });
+
+  // --- stat count-up ---
+  function countUp(el){
+    var to = +el.getAttribute('data-to'), t0 = null;
+    function step(ts){ if(!t0) t0=ts; var p = Math.min((ts-t0)/900,1); var v = Math.round((1-Math.pow(1-p,3))*to);
+      el.textContent = v.toLocaleString(); if(p<1) requestAnimationFrame(step); }
+    requestAnimationFrame(step);
+  }
+  var sio = new IntersectionObserver(function(es){
+    es.forEach(function(e){ if(e.isIntersecting){ if(reduce){ e.target.textContent = (+e.target.getAttribute('data-to')).toLocaleString(); } else countUp(e.target); sio.unobserve(e.target);} });
+  }, {threshold:.5});
+  document.querySelectorAll('.stat .n').forEach(function(el){ sio.observe(el); });
+
+  // --- replay tape HUD ---
+  if(!reduce){
+    var fr = document.getElementById('t-frame'), p1 = document.getElementById('t-p1'), p2 = document.getElementById('t-p2');
+    var f = 0, tick = 0;
+    function hx(n){ return n.toString(16).toUpperCase().padStart(4,'0'); }
+    (function loop(){
+      tick++;
+      if(tick%6===0){ f++; fr.textContent = String(f).padStart(6,'0');
+        p1.textContent = hx((Math.random()*65535)|0); p2.textContent = hx((Math.random()*65535)|0); }
+      requestAnimationFrame(loop);
+    })();
+  }
+
+  // --- hero depth grid ---
+  var cv = document.getElementById('grid'), ctx = cv.getContext('2d'), W=0, H=0, dpr=Math.min(window.devicePixelRatio||1, 2);
+  var mx = 0, my = 0, mtx = 0, mty = 0;
+  function resize(){ var r = cv.getBoundingClientRect(); W=r.width; H=r.height; cv.width=W*dpr; cv.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); }
+  window.addEventListener('resize', resize); resize();
+  window.addEventListener('pointermove', function(e){ mtx = (e.clientX/window.innerWidth - .5); mty = (e.clientY/window.innerHeight - .5); }, {passive:true});
+  var t = 0, raf;
+  function draw(){
+    t += 0.016; mx += (mtx-mx)*0.05; my += (mty-my)*0.05;
+    ctx.clearRect(0,0,W,H);
+    var hz = H*0.42 + my*40;            // horizon
+    var vx = W*0.5 + mx*120;            // vanishing point x
+    var g = ctx.createRadialGradient(vx, hz, 0, vx, hz, Math.max(W,H)*0.6);
+    g.addColorStop(0,'rgba(239,106,36,0.22)'); g.addColorStop(.4,'rgba(53,201,176,0.05)'); g.addColorStop(1,'rgba(8,10,13,0)');
+    ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+    ctx.lineWidth = 1;
+    var scroll = (t*0.35)%1;
+    for(var i=1;i<=22;i++){
+      var p = (i - scroll)/22;
+      if(p<=0) continue;
+      var y = hz + (H-hz) * (p*p);
+      var a = Math.max(0, (1-p)) * 0.5;
+      ctx.strokeStyle = 'rgba(80,120,130,'+a*0.5+')';
+      ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
+    }
+    for(var j=-10;j<=10;j++){
+      var fx = vx + j*(W*0.11);
+      var a2 = Math.max(0, 1-Math.abs(j)/11)*0.28;
+      ctx.strokeStyle = 'rgba(239,106,36,'+a2*0.35+')';
+      ctx.beginPath(); ctx.moveTo(vx + j*22, hz); ctx.lineTo(fx, H); ctx.stroke();
+    }
+    ctx.strokeStyle='rgba(53,201,176,0.4)'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(0,hz); ctx.lineTo(W,hz); ctx.stroke();
+    for(var k=0;k<26;k++){
+      var seed = k*127.3;
+      var ex = (W* ((Math.sin(seed)*0.5+0.5)) + Math.sin(t*0.3+seed)*30);
+      var ey = hz - ((t*18 + k*37) % (hz+40));
+      var es = (Math.sin(seed*3)*0.5+0.5)*1.8+0.4;
+      var ea = Math.max(0, ey/hz)*0.6;
+      ctx.fillStyle='rgba(255,176,97,'+ea+')';
+      ctx.beginPath(); ctx.arc(ex, ey, es, 0, 6.283); ctx.fill();
+    }
+    raf = requestAnimationFrame(draw);
+  }
+  if(reduce){
+    (function(){ var hz=H*0.42, vx=W*0.5;
+      var g=ctx.createRadialGradient(vx,hz,0,vx,hz,Math.max(W,H)*0.6);
+      g.addColorStop(0,'rgba(239,106,36,0.2)'); g.addColorStop(1,'rgba(8,10,13,0)'); ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+      ctx.strokeStyle='rgba(53,201,176,0.4)'; ctx.beginPath(); ctx.moveTo(0,hz); ctx.lineTo(W,hz); ctx.stroke();
+    })();
+  } else {
+    draw();
+    document.addEventListener('visibilitychange', function(){ if(document.hidden){ cancelAnimationFrame(raf); } else { draw(); } });
+  }
+})();
+</script>

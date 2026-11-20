@@ -1,0 +1,122 @@
+// Which logical button each physical one presses.
+remap {
+    x = x
+    y = y
+    z = z
+    a = a
+    b = b
+    c = c
+    s = s
+}
+
+commands (time: 15, buffer: 1) {
+    x         (time: 1) = x
+    y         (time: 1) = y
+    z         (time: 1) = z
+    a         (time: 1) = a
+    b         (time: 1) = b
+    c         (time: 1) = c
+    start     (time: 1) = s
+    recovery  (time: 1) = x+y
+    holdfwd   (time: 1) = /$F
+    holdback  (time: 1) = /$B
+    holdup    (time: 1) = /$U
+    holddown  (time: 1) = /$D
+    hold_x    (time: 1) = /x
+    hold_y    (time: 1) = /y
+    hold_z    (time: 1) = /z
+    hold_a    (time: 1) = /a
+    hold_b    (time: 1) = /b
+    hold_c    (time: 1) = /c
+    FF        (time: 8) = F, F
+    BB        (time: 8) = B, B
+    rio       (time: 40) = ~D, DF, F, D, DF, F, c
+    rio       (time: 40) = ~D, DF, F, D, DF, F, b
+    bolt      (time: 18) = ~D, DF, F, x
+    bolt      (time: 18) = ~D, DF, F, y
+    bolt      (time: 18) = ~D, DF, F, z
+    tres      (time: 18) = ~D, DF, F, a
+    tres      (time: 18) = ~D, DF, F, b
+    tres      (time: 18) = ~D, DF, F, c
+    cyclone   (time: 18) = ~D, DB, B, a
+    cyclone   (time: 18) = ~D, DB, B, b
+    cyclone   (time: 18) = ~D, DB, B, c
+    redondo   (time: 18) = ~F, D, DF, x
+    redondo   (time: 18) = ~F, D, DF, y
+    redondo   (time: 18) = ~F, D, DF, z
+    vault     (time: 18) = ~D, DB, B, x
+    vault     (time: 18) = ~D, DB, B, y
+    vault     (time: 18) = ~D, DB, B, z
+    puno      (time: 2) = /$F, z
+    throwfwd  (time: 2) = /$F, y
+    throwback (time: 2) = /$B, y
+}
+
+state -1 {
+    if command == "rio" && power >= 3000 && (statetype != A || stateno in [100, 106]) && (ctrl || stateno in [200, 230] && movecontact || stateno in [1100, 1120] && movecontact) {
+        ChangeState(value: 3000)
+    }
+    if command == "redondo" && (statetype != A || stateno in [100, 106]) && (ctrl || stateno in [200, 230] && movecontact || stateno in [400, 430] && movecontact) {
+        ChangeState(value: 1300)
+    }
+    if command == "bolt" && (statetype != A || stateno in [100, 106]) && (ctrl || stateno in [200, 230] && movecontact || stateno in [400, 430] && movecontact) {
+        ChangeState(value: 1000)
+    }
+    if command == "tres" && (statetype != A || stateno in [100, 106]) && (ctrl || stateno in [200, 230] && movecontact || stateno in [400, 430] && movecontact) {
+        ChangeState(value: 1100)
+    }
+    if command == "cyclone" && (ctrl && statetype == S || ctrl && statetype == A || stateno in [200, 230] && movecontact) {
+        ChangeState(value: 1200)
+    }
+    if command == "vault" && statetype == S && ctrl {
+        ChangeState(value: 1400)
+    }
+    if (command == "throwfwd" || command == "throwback") && statetype == S && ctrl && stateno != 100 && p2bodydist X < 8 && ((p2statetype == S) || (p2statetype == C)) && p2movetype != H {
+        ChangeState(value: 800)
+    }
+    if command == "FF" && statetype == S && ctrl {
+        ChangeState(value: 100)
+    }
+    if command == "BB" && statetype == S && ctrl {
+        ChangeState(value: 105)
+    }
+    if command == "puno" && statetype == S && ctrl {
+        ChangeState(value: 230)
+    }
+    if command == "c" && command != "holddown" && (statetype == S && ctrl || stateno in [200, 215] && movecontact) {
+        ChangeState(value: 225)
+    }
+    if command == "z" && command != "holddown" && (statetype == S && ctrl || stateno in [200, 215] && movecontact) {
+        ChangeState(value: 220)
+    }
+    if command == "b" && command != "holddown" && (statetype == S && ctrl || stateno in [200, 205] && movecontact) {
+        ChangeState(value: 215)
+    }
+    if command == "y" && command != "holddown" && (statetype == S && ctrl || stateno in [200, 205] && movecontact) {
+        ChangeState(value: 210)
+    }
+    if command == "a" && command != "holddown" && (statetype == S && ctrl || stateno == 200 && movecontact) {
+        ChangeState(value: 205)
+    }
+    if command == "x" && command != "holddown" && statetype == S && ctrl {
+        ChangeState(value: 200)
+    }
+    if command == "c" && command == "holddown" && statetype == C && ctrl {
+        ChangeState(value: 430)
+    }
+    if (command == "y" || command == "z" || command == "b") && command == "holddown" && (statetype == C && ctrl || stateno == 400 && movecontact) {
+        ChangeState(value: 410)
+    }
+    if (command == "x" || command == "a") && command == "holddown" && statetype == C && ctrl {
+        ChangeState(value: 400)
+    }
+    if (command == "z" || command == "c") && statetype == A && ctrl {
+        ChangeState(value: 620)
+    }
+    if (command == "x" || command == "y" || command == "a" || command == "b") && statetype == A && ctrl {
+        ChangeState(value: 600)
+    }
+    if command == "start" && statetype != A && ctrl {
+        ChangeState(value: 195)
+    }
+}

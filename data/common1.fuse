@@ -1,0 +1,1185 @@
+# Oxyde — the common states.
+#
+# The states every character falls back on: standing, walking, jumping,
+# guarding, being hit, and getting up again. Almost every character's `.def`
+# says `stcommon = common1.cns` and expects to find them here; the engine finds
+# this file whatever extension it carries.
+#
+# # What this is, and what it is not
+#
+# This is Oxyde's own, written against the *contract* rather than translated
+# from anyone's file. MUGEN's `common1.cns` is Elecbyte's and cannot be
+# redistributed; Ikemen GO's equivalent is MIT and was what shipped before
+# this, and it is written against Ikemen's conventions rather than MUGEN's —
+# measurably so, see the table below.
+#
+# The contract comes from three places, none of which is anyone's source:
+#
+# * **Kung Fu Man's `.air`**, which names every animation this file selects —
+#   "Stand/Air Hit high (medium)", "Get up from LieDown", "Fall-recovery in
+#   mid-air". That is Elecbyte documenting the convention characters are
+#   written against, and it is the only complete statement of it: Appendix A of
+#   `cns.html`, which was meant to list these states, stops after five entries
+#   with "This list is not yet complete."
+# * **The engine**, which owns the transitions *into* these states and says so
+#   in its own comments — which animation bank a `GetHitVar(animtype)` selects,
+#   that a knockdown lands into 5100, that a KO always ends on the floor.
+# * **The roster**, measured. 1,051 characters enter these states 180,000 times
+#   between them; what they expect is not a matter of opinion.
+#
+# # How it is checked
+#
+#     oxtool fuse data/common1.fuse    # does it compile, and is it sane
+#     oxtool audit <root> --limit 1051 # does the roster still work
+#
+# The audit is the one that matters. **Run it over the whole roster**, not over
+# `--limit 300`: at 300 characters one of them is a third of a point, and a
+# variant of this file that won four rows on that sample lost five on the full
+# 1,051. `--cards` prints one line per character so two runs can be diffed by
+# name rather than by percentage.
+#
+# # Where it is better than the other two
+#
+# **Every animation is chosen with a fallback.** MUGEN and Ikemen both name an
+# animation and hope: a character missing anim 5021 is left in whatever it was
+# playing, which is usually a frozen attack frame, and a quarter of this
+# archive is missing *something* in the 5000 range. Here every selection falls
+# back — the exact animation, then the light variant of its bank, then the bank
+# every character has — so a gap costs a slightly wrong picture instead of a
+# fighter that never gets up. `HitAnim` and `FallAnim` below are the whole of
+# it.
+#
+# **Every loop has a second way out.** `animTime == 0` is the exit from the
+# jump start, the crouch, the stand-up and the guard start — and a character
+# whose animation loops never reaches it. Each of those also leaves on a tick
+# count. This is not hypothetical: it is why the jump-start state is written
+# with one exit that sets the velocity *and* changes state, rather than two.
+#
+# **The guard ends in the stance it was held in.** `common1.cns`'s 151 returns
+# to 130 unconditionally, which drops a fighter who crouch-blocked into the
+# standing guard state while `stateType` still says `C`.
+#
+# **An air guard that outlasts the jump lands.** Both 132 and 155 check for the
+# floor. Without that a fighter who blocks in mid-air hovers there.
+#
+# **It needs nothing else.** No `common.const`, no sibling files, no engine
+# extensions. One file.
+#
+# # Overriding one
+#
+# A character that wants different behaviour writes a state of the same number
+# in its own files; that one wins. Nothing here has to be edited.
+
+# --------------------------------------------------------------- state names
+#
+# The numbers are MUGEN's and cannot change — a character that falls over asks
+# for 5110 by number. Naming them is so that this file can be read.
+
+const Stand                  = 0
+const StandToCrouch          = 10
+const Crouch                 = 11
+const CrouchToStand          = 12
+const Walk                   = 20
+const JumpStart              = 40
+const AirJumpStart           = 45
+const JumpUp                 = 50
+const JumpDown               = 51
+const JumpLand               = 52
+const RunFwd                 = 100
+const HopBack                = 105
+const HopBackLand            = 106
+const DodgeBack              = 110
+const DodgeFwd               = 115
+const GuardStart             = 120
+const StandGuard             = 130
+const CrouchGuard            = 131
+const AirGuard               = 132
+const GuardEnd               = 140
+const StandGuardHitShake     = 150
+const StandGuardKnockBack    = 151
+const CrouchGuardHitShake    = 152
+const CrouchGuardKnockBack   = 153
+const AirGuardHitShake       = 154
+const AirGuardKnockBack      = 155
+const LosePose               = 170
+const DrawPose               = 175
+const Intro                  = 190
+const IntroWait              = 191
+const HitShake               = 5000
+const HitStand               = 5001
+const CrouchHitShake         = 5010
+const HitCrouch              = 5011
+const HitAirShake            = 5020
+const HitAirTransition       = 5030
+const HitAirUp               = 5035
+const HitAirRecover          = 5040
+const HitAirFall             = 5050
+const HitTrip                = 5070
+const HitTripFall            = 5071
+const HitLieDownShake        = 5080
+const HitLieDownFall         = 5081
+const FallBounce             = 5100
+const FallBounceUp           = 5101
+const LieDown                = 5110
+const GetUp                  = 5120
+const LieDead                = 5150
+const FallRecoverGround      = 5200
+const FallRecoverGroundLand  = 5201
+const FallRecoverAir         = 5210
+const KO                     = 5500
+const Initialise             = 5900
+
+# -------------------------------------------------------------- animations
+#
+# Named for the same reason, and separately: an animation 5110 and a state 5110
+# are different things that happen to share a digit.
+
+const AnimStand              = 0
+const AnimStandToCrouch      = 10
+const AnimCrouch             = 11
+const AnimCrouchToStand      = 12
+const AnimWalkFwd            = 20
+const AnimWalkBack           = 21
+const AnimTurn               = 5
+const AnimTurnCrouch         = 6
+const AnimDodge              = 110
+const AnimJumpStart          = 40
+const AnimJumpUp             = 41
+const AnimJumpFwd            = 42
+const AnimJumpDown           = 43
+const AnimAirJump            = 44
+const AnimJumpLand           = 47
+const AnimRun                = 100
+const AnimHopBack            = 105
+const AnimHopBackLand        = 106
+const AnimStandGuardStart    = 120
+const AnimCrouchGuardStart   = 121
+const AnimAirGuardStart      = 122
+const AnimStandGuard         = 130
+const AnimCrouchGuard        = 131
+const AnimAirGuard           = 132
+const AnimStandGuardEnd      = 140
+const AnimCrouchGuardEnd     = 141
+const AnimAirGuardEnd        = 142
+const AnimStandGuardHit      = 150
+const AnimCrouchGuardHit     = 152
+const AnimAirGuardHit        = 154
+# The hit banks. `HitAnim` picks within one; each is light/medium/hard.
+const AnimHitHigh            = 5000
+const AnimHitLow             = 5010
+const AnimHitCrouch          = 5020
+const AnimHitBack            = 5030
+const AnimHitTransition      = 5035
+const AnimAirRecover         = 5040
+const AnimFallUp             = 5050
+const AnimFallUpType         = 5051
+const AnimFallUpTypeDown     = 5061
+const AnimTripped            = 5070
+const AnimLieDownHit         = 5080
+const AnimLieDownHitUp       = 5090
+const AnimHitGround          = 5100
+const AnimHitGroundUp        = 5101
+const AnimLieDown            = 5110
+const AnimGetUp              = 5120
+const AnimLieDead            = 5150
+const AnimFallRecoverGround  = 5200
+const AnimFallRecoverAir     = 5210
+const AnimLoseKO             = 5300
+const AnimKOPose             = 5500
+const AnimIntro              = 190
+const AnimHitRecoilHigh      = 5005    # + animType
+const AnimHitRecoilLow       = 5015    # + animType
+const AnimHitRecoilCrouch    = 5025    # + animType
+const AnimFallBounceUp       = 5160
+const AnimLieDownFromBounce  = 5170
+
+# --------------------------------------------------------------- selection
+#
+# The two functions that make this file more robust than the engines it is
+# written against.
+
+fn HitAnim(bank, strength) -> pick {
+    # The animation for one hit: a bank (high, low, crouching) and how hard.
+    #
+    # `GetHitVar(animtype)` is 0 light, 1 medium, 2 hard — and 3, 4, 5 for
+    # back, up and diagonal-up, which belong to a different bank entirely and
+    # never reach here.
+    #
+    # Every step falls back. A character with no `5021` gets `5020`; one with
+    # no crouching bank at all gets the high bank, which every character in
+    # this archive has. Without this the engine leaves the previous animation
+    # playing — usually a frozen attack frame — and the fighter never recovers.
+    let want = bank + strength
+    return ifElse(selfAnimExist(want), want,
+             ifElse(selfAnimExist(bank), bank,
+               ifElse(selfAnimExist(AnimHitHigh + strength), AnimHitHigh + strength,
+                 AnimHitHigh)))
+}
+
+# The ground guard knockback, shared by 151 and 153. `hitVelSet` takes the
+# pushback the attacker's HitDef asked for -- writing a velocity here instead
+# is what makes a blocked heavy hit feel identical to a blocked light one.
+fn GuardKnockBack() {
+    if time == 0 {
+        hitVelSet(x: 1)
+    }
+    if time == getHitVar(slideTime) || hitOver {
+        velSet(x: 0)
+    }
+    if time == getHitVar(ctrlTime) {
+        ctrlSet(value: 1)
+    }
+    if stateType == S && command == "holddown" {
+        stateTypeSet(stateType: C, physics: C)
+    }
+    if stateType == C && command != "holddown" {
+        stateTypeSet(stateType: S, physics: S)
+    }
+    # Back to the guard for the stance held now. Elecbyte's returns to 130
+    # unconditionally, which drops a crouch-blocking fighter into the standing
+    # guard state while `stateType` still says C.
+    if hitOver {
+        changeState(value: ifElse(stateType == C, CrouchGuard, StandGuard), ctrl: 1)
+    }
+}
+
+fn FallAnim(want, spare) -> pick {
+    # One animation with one alternative, then the hit bank.
+    #
+    # Used everywhere a *single* animation is named rather than a bank: the
+    # fall, the landing, lying down, getting up. `spare` is the closest thing
+    # that means nearly the same; `AnimHitHigh` is the floor, because a
+    # character that does not have that cannot be hit at all.
+    return ifElse(selfAnimExist(want), want,
+             ifElse(selfAnimExist(spare), spare, AnimHitHigh))
+}
+
+# =========================================================== standing states
+#
+# The engine owns the *transitions* between these — nothing here turns "hold
+# forward" into a walk, and nothing needs to. What these states own is the
+# animation, the physics and the velocity while the fighter is in them.
+
+# `ctrl` is absent from every header in this section, and that is the point.
+# A Statedef that does not mention `ctrl` leaves it exactly as it was, which
+# is what lets the engine's own movement transitions move a fighter between
+# standing, walking, crouching and jumping without handing control back and
+# forth on every tick. Writing `ctrl: 0` into one of these -- state 10 is the
+# easy mistake -- strips control from anyone who ducks and never returns it.
+
+state Stand = 0 (type: S, physics: S, sprpriority: 0) {
+    # Re-pinned every tick rather than at `time == 0`: a character can be put
+    # into this state from anywhere, and `time == 0` misses the ones that
+    # arrive later. Animation 5 is the turn, which is allowed to finish.
+    if anim != AnimStand && anim != AnimTurn && selfAnimExist(AnimStand) {
+        changeAnim(value: AnimStand)
+    }
+    if anim == AnimTurn && animTime == 0 {
+        changeAnim(value: AnimStand)
+    }
+    if time == 0 {
+        velSet(y: 0)
+    }
+    # Bleed off a slide rather than stopping dead on the frame of arrival.
+    if abs(vel x) < 2 && time == 4 {
+        velSet(x: 0)
+    }
+    # Dead on their feet: a fighter whose life reached zero without being
+    # knocked down still has to fall over.
+    if !alive {
+        changeState(value: HitAirFall)
+    }
+}
+
+state StandToCrouch = 10 (type: C, physics: C, anim: AnimStandToCrouch) {
+    if time == 0 {
+        velMul(x: 0.75)
+    }
+    # `|| time >= 12`: the exit is the animation ending, and a character whose
+    # animation 10 loops has no ending. Without the second condition they
+    # crouch forever.
+    if animTime == 0 || time >= 12 {
+        changeState(value: Crouch)
+    }
+}
+
+state Crouch = 11 (type: C, physics: C, anim: AnimCrouch, sprpriority: 0) {
+    if anim == AnimTurnCrouch && animTime == 0 {
+        changeAnim(value: AnimCrouch)
+    }
+}
+
+state CrouchToStand = 12 (type: S, physics: S, anim: AnimCrouchToStand) {
+    if animTime == 0 || time >= 12 {
+        changeState(value: Stand)
+    }
+}
+
+state Walk = 20 (type: S, physics: S, sprpriority: 0) {
+    # Forward or backward, decided every tick: a fighter can turn while
+    # walking, and the animation has to follow without restarting.
+    if command == "holdfwd" {
+        velSet(x: const(velocity.walk.fwd.x))
+    }
+    if command == "holdback" {
+        velSet(x: const(velocity.walk.back.x))
+    }
+    let want = ifElse(vel x < 0, AnimWalkBack, AnimWalkFwd)
+    if vel x != 0 && anim != want && anim != AnimTurn && selfAnimExist(want) {
+        changeAnim(value: want)
+    }
+    if anim == AnimTurn && animTime == 0 {
+        changeAnim(value: want)
+    }
+}
+
+# ============================================================= jumping
+#
+# The engine sends a fighter here and owns the air-jump bookkeeping. The
+# velocity is *these states'* job, and only they can do it: the direction is
+# decided by what is held on the tick the jump leaves the ground.
+
+state JumpStart = 40 (type: S, physics: S, anim: AnimJumpStart, ctrl: 0, sprpriority: 1) {
+    # The direction is latched at `time == 0` rather than read at takeoff.
+    # Reading it at takeoff means a player who taps up-forward and releases
+    # during the four-frame crouch jumps straight up, which does not match
+    # what they pressed.
+    if time == 0 {
+        sysVar(1) = 0
+    }
+    if command == "holdfwd" {
+        sysVar(1) = 1
+    }
+    if command == "holdback" {
+        sysVar(1) = -1
+    }
+    # The exit sets the velocity and leaves in the same breath. Splitting the
+    # timeout into its own `changeState` -- as a guard against a jump-start
+    # animation that loops -- sends the fighter to state 50 with no jump
+    # velocity at all, and they never leave the ground.
+    if animTime == 0 || time >= 12 {
+        velSet(
+            x: ifElse(sysVar(1) == 0, const(velocity.jump.neu.x),
+                 ifElse(sysVar(1) > 0, const(velocity.jump.fwd.x),
+                                       const(velocity.jump.back.x))),
+            y: const(velocity.jump.y))
+        # Out of a run, forward means the run jump.
+        if prevStateNo == RunFwd && sysVar(1) == 1 {
+            velSet(x: const(velocity.runjump.fwd.x), y: const(velocity.jump.y))
+        }
+        changeState(value: JumpUp, ctrl: 1)
+    }
+}
+
+state AirJumpStart = 45 (type: A, physics: N, ctrl: 0, velset: 0, 0) {
+    # No crouch to play in mid-air, so this is two frames of bookkeeping. 44
+    # is the dedicated air-jump animation; most characters reuse 41.
+    if time == 0 {
+        changeAnim(value: FallAnim(AnimAirJump, AnimJumpUp))
+        sysVar(1) = 0
+    }
+    if command == "holdfwd" {
+        sysVar(1) = 1
+    }
+    if command == "holdback" {
+        sysVar(1) = -1
+    }
+    if time == 2 {
+        velSet(
+            x: ifElse(sysVar(1) == 0, const(velocity.airjump.neu.x),
+                 ifElse(sysVar(1) > 0, const(velocity.airjump.fwd.x),
+                                       const(velocity.airjump.back.x))),
+            y: const(velocity.airjump.y))
+        changeState(value: JumpUp, ctrl: 1)
+    }
+}
+
+state JumpUp = 50 (type: A, physics: A) {
+    # Rising and falling share a state and differ by one animation, picked
+    # from the horizontal velocity at takeoff: 41 neutral, 42 forward, 43
+    # back. `vel y > -2` swaps to the 44/45/46 descent bank if drawn.
+    #
+    # There is deliberately no landing check. `physics: A` hands that to the
+    # engine, which owns it for every airborne state and gets the corner
+    # cases -- a raised floor, a fighter bound to another -- right in one
+    # place rather than in each of them.
+    if time == 0 {
+        sysVar(1) = 0
+        changeAnim(value: ifElse(vel x == 0, AnimJumpUp,
+                            ifElse(vel x > 0, AnimJumpFwd, AnimJumpDown)))
+    }
+    if vel y > -2 && selfAnimExist(anim + 3) {
+        @persistent(0)
+        changeAnim(value: anim + 3)
+    }
+}
+
+state JumpDown = 51 (type: A, physics: A) {
+    # Reachable only from a character's own code. Nothing to do: the engine
+    # lands them, and whatever animation put them here keeps playing.
+    null()
+}
+
+state JumpLand = 52 (type: S, physics: S, ctrl: 0, anim: AnimJumpLand) {
+    if time == 0 {
+        velSet(y: 0)
+        posSet(y: 0)
+    }
+    # Control comes back on frame 3, before the animation ends, so landing
+    # does not eat a buffered input. The state change still waits for the
+    # animation -- or for a landing animation the character never drew.
+    if time == 3 {
+        ctrlSet(value: 1)
+    }
+    if animTime == 0 || !selfAnimExist(AnimJumpLand) {
+        changeState(value: Stand, ctrl: 1)
+    }
+}
+
+# ============================================================= running
+#
+# "MUGEN's default behaviour for the running state is to have the player
+# continue moving forward at a constant speed, until you let go of the forward
+# key" -- cns.html, which documents this one because it is the example it uses
+# for overriding a common state.
+
+state RunFwd = 100 (type: S, physics: S, anim: AnimRun, sprpriority: 1) {
+    velSet(x: const(velocity.run.fwd.x))
+    # A run is not a walk and does not turn around in the middle of itself:
+    # both would otherwise fire from the engine's movement transitions on any
+    # tick the opponent crossed over.
+    assertSpecial(flag: NoWalk)
+    assertSpecial(flag: NoAutoTurn)
+    if command != "holdfwd" {
+        changeState(value: Stand)
+    }
+}
+
+state HopBack = 105 (type: A, physics: N, ctrl: 0, anim: AnimHopBack, sprpriority: 1) {
+    if time == 0 {
+        velSet(x: const(velocity.run.back.x), y: const(velocity.run.back.y))
+    }
+    if time == 2 {
+        ctrlSet(value: 1)
+    }
+    velAdd(y: const(movement.yaccel))
+    if vel y > 0 && pos y >= 0 {
+        changeState(value: HopBackLand)
+    }
+}
+
+state HopBackLand = 106 (type: S, physics: S, ctrl: 0, anim: AnimJumpLand) {
+    if time == 0 {
+        velSet(y: 0)
+        posSet(y: 0)
+    }
+    if time == 2 {
+        makeDust(pos: -5, -2, spacing: 1)
+    }
+    if time == 7 {
+        changeState(value: Stand, ctrl: 1)
+    }
+}
+
+# ============================================================== dodging
+#
+# The depth axis, from MUGEN 1.1. A character with no z movement never
+# reaches these, and a stage with no depth gives them nowhere to go -- but
+# leaving them out means a 1.1 character that steps into the background
+# simply cannot.
+
+fn Dodge(away) {
+    if time == 0 {
+        ctrlSet(value: 0)
+        changeAnim(value: FallAnim(AnimDodge, AnimStand))
+        hitBy(value: SCA, NT, ST, HT, time: 30)
+        velSet(x: 0, z: away)
+    }
+    velMul(z: 0.8)
+    if animTime == -8 {
+        velSet(z: 0)
+    }
+    if animTime == 0 {
+        ctrlSet(value: 1)
+        changeState(value: Stand)
+    }
+}
+
+state DodgeBack = 110 (type: S, physics: S) {
+    Dodge(-7)
+}
+
+state DodgeFwd = 115 (type: S, physics: S) {
+    Dodge(7)
+}
+
+# ============================================================= guarding
+#
+# The engine decides *whether* a guard happens — `InGuardDist`, the guard flags
+# on the incoming `HitDef`, whether the fighter is holding back. These states
+# are what a guard looks like once it has been decided.
+
+# Guarding is the character's to end, not the engine's. `common1.cns` writes
+# the exit into all four states -- let go of back, or the attack ends and the
+# opponent leaves guard distance, and the fighter goes to 140. Nothing in the
+# engine does this, so a common file that omits it leaves fighters frozen in
+# a block for the rest of the round.
+fn StopGuarding() {
+    if command != "holdback" || !inGuardDist {
+        changeState(value: GuardEnd)
+    }
+}
+
+# The stance a guard should be held in right now. Written once, so the four
+# states cannot disagree about it the way three copies of the expression can.
+fn GuardStance() -> want {
+    return ifElse(stateType == A, AirGuard,
+             ifElse(command == "holddown", CrouchGuard, StandGuard))
+}
+
+state GuardStart = 120 (type: U, physics: U) {
+    # `type: U` / `physics: U`: entered from standing, crouching or the air,
+    # and the stance the fighter already had is the one they guard in.
+    if time == 0 {
+        changeAnim(value: FallAnim(
+            ifElse(stateType == A, AnimAirGuardStart,
+              ifElse(stateType == C, AnimCrouchGuardStart, AnimStandGuardStart)),
+            AnimStandGuardStart))
+        stateTypeSet(physics: ifElse(stateType == A, N,
+                               ifElse(stateType == C, C, S)))
+    }
+    # High to low and back, while the guard start is still playing.
+    if stateType == S && command == "holddown" {
+        stateTypeSet(stateType: C, physics: C)
+    }
+    if stateType == C && command != "holddown" {
+        stateTypeSet(stateType: S, physics: S)
+    }
+    # `animTime == 0` alone strands a fighter here forever on a character whose
+    # 120-122 animation loops -- and enough of them do that this is worth a
+    # second condition rather than a comment.
+    if animTime == 0 || time >= 12 {
+        changeState(value: GuardStance())
+    }
+    StopGuarding()
+}
+
+state StandGuard = 130 (type: S, physics: S) {
+    if anim != AnimStandGuard && selfAnimExist(AnimStandGuard) {
+        changeAnim(value: AnimStandGuard)
+    }
+    if command == "holddown" {
+        changeState(value: CrouchGuard)
+    }
+    StopGuarding()
+}
+
+state CrouchGuard = 131 (type: C, physics: C) {
+    if anim != AnimCrouchGuard && selfAnimExist(AnimCrouchGuard) {
+        changeAnim(value: AnimCrouchGuard)
+    }
+    if command != "holddown" {
+        changeState(value: StandGuard)
+    }
+    StopGuarding()
+}
+
+state AirGuard = 132 (type: A, physics: N) {
+    if anim != AnimAirGuard && selfAnimExist(AnimAirGuard) {
+        changeAnim(value: AnimAirGuard)
+    }
+    # `physics: N`, so gravity is applied here by hand. Coming down is the
+    # only way out of an air guard, and an air guard that never lands is a
+    # fighter hovering for the rest of the round.
+    velAdd(y: const(movement.yaccel))
+    let landed = pos y >= 0 && vel y > 0
+    if landed {
+        velSet(y: 0)
+        posSet(y: 0)
+        # Still holding back with an attack in range: keep guarding on the
+        # ground rather than dropping the block on the landing frame.
+        if command == "holdback" && inGuardDist {
+            changeState(value: ifElse(command == "holddown", CrouchGuard, StandGuard))
+        }
+        changeState(value: JumpLand)
+    }
+    StopGuarding()
+}
+
+state GuardEnd = 140 (type: U, physics: U, ctrl: 1) {
+    # The engine returns the fighter to their idle state once this animation
+    # finishes -- `guard_end_transition` watches for state 140 specifically --
+    # so all this owes it is the animation and the stance.
+    if time == 0 {
+        changeAnim(value: FallAnim(
+            ifElse(stateType == A, AnimAirGuardEnd,
+              ifElse(stateType == C, AnimCrouchGuardEnd, AnimStandGuardEnd)),
+            AnimStand))
+        stateTypeSet(physics: ifElse(stateType == A, N,
+                               ifElse(stateType == C, C, S)))
+    }
+    if stateType == S && command == "holddown" {
+        stateTypeSet(stateType: C, physics: C)
+    }
+    if stateType == C && command != "holddown" {
+        stateTypeSet(stateType: S, physics: S)
+    }
+}
+
+state StandGuardHitShake = 150 (type: S, movetype: H, physics: N, velset: 0, 0) {
+    # Frozen for `getHitVar(hitShakeTime)`. `physics: N` and `velset` hold the
+    # fighter still while the hit registers; the knockback is state 151's job.
+    if time == 0 {
+        changeAnim(value: FallAnim(AnimStandGuardHit, AnimStandGuard))
+    }
+    # Blocking high, then ducking — a stand block turns into a crouch block
+    # mid-freeze, and back. Without this a fighter is locked into the stance
+    # they happened to be in when the first hit of a string landed.
+    if stateType == S && command == "holddown" {
+        stateTypeSet(stateType: C, physics: C)
+    }
+    if stateType == C && command != "holddown" {
+        stateTypeSet(stateType: S, physics: S)
+    }
+    if hitShakeOver {
+        # Leave by the stance held *now*, not the one entered with.
+        changeState(value: ifElse(stateType == C, CrouchGuardKnockBack,
+                                                  StandGuardKnockBack))
+    }
+}
+
+state StandGuardKnockBack = 151 (type: S, movetype: H, physics: S, anim: AnimStandGuardHit) {
+    GuardKnockBack()
+}
+
+state CrouchGuardHitShake = 152 (type: C, movetype: H, physics: N, velset: 0, 0) {
+    if time == 0 {
+        changeAnim(value: FallAnim(AnimCrouchGuardHit, AnimCrouchGuard))
+    }
+    if stateType == C && command != "holddown" {
+        stateTypeSet(stateType: S, physics: S)
+    }
+    if hitShakeOver {
+        changeState(value: ifElse(stateType == C, CrouchGuardKnockBack,
+                                                  StandGuardKnockBack))
+    }
+}
+
+state CrouchGuardKnockBack = 153 (type: C, movetype: H, physics: C, anim: AnimCrouchGuardHit) {
+    GuardKnockBack()
+}
+
+state AirGuardHitShake = 154 (type: A, movetype: H, physics: N, velset: 0, 0) {
+    if time == 0 {
+        changeAnim(value: FallAnim(AnimAirGuardHit, AnimAirGuard))
+    }
+    if hitShakeOver {
+        changeState(value: AirGuardKnockBack)
+    }
+}
+
+state AirGuardKnockBack = 155 (type: A, movetype: H, physics: N, anim: AnimAirGuardHit) {
+    if time == 0 {
+        hitVelSet(x: 1, y: 1)
+    }
+    # Airborne, so gravity applies once the pushback is spent rather than the
+    # velocity simply being zeroed: a fighter blocking in the air comes down.
+    if time == getHitVar(ctrlTime) {
+        ctrlSet(value: 1)
+    }
+    if hitOver {
+        changeState(value: JumpDown, ctrl: 1)
+    }
+    # Blocked to the floor. Without this an air block that outlasts the jump
+    # leaves the fighter standing on nothing until the guard times out.
+    if vel y > 0 && pos y >= 0 {
+        changeState(value: JumpLand, ctrl: 1)
+    }
+}
+
+# ============================================================ being hit
+#
+# The chain, and the half of this file that decides whether a character works.
+#
+#     5000  hit shake      — frozen for `GetHitVar(hitshaketime)`
+#       |
+#       +-- 5001  hit, standing      --> 0
+#       +-- 5011  hit, crouching     --> 11
+#       +-- 5070  tripped            --> 5100
+#       +-- 5030  hit, airborne      --> 5035 --> 5050
+#
+#     5010 / 5020 / 5080 are the same shake for a fighter who was
+#     crouching, airborne or already on the floor — the engine picks by
+#     stance, so each bank is right by default rather than by a branch.
+#                                                  |
+#                5050  falling --> 5070 --> 5100 --> 5110 --> 5120 --> 0
+#                                        (or 5200/5210 if recovering)
+#
+# Every animation below goes through `HitAnim` or `FallAnim`. That is the
+# difference between this file and the two it is written against: a character
+# missing one animation loses a frame of polish rather than the ability to
+# stand up.
+
+# --- the three things every state below shares ----------------------------
+#
+# Gravity in the get-hit chain is the *attacker's*, not the stage's: a HitDef
+# with a heavy `yaccel` is what makes a launcher feel different from a jab.
+fn HitGravity() {
+    velAdd(y: getHitVar(yaccel))
+}
+
+# The animation for a fresh hit, given the bank the stance implies. `animType`
+# 3, 4 and 5 -- back, up, diagonal-up -- leave the bank entirely for 5030, and
+# 4 and 5 prefer a dedicated 5051/5052 when the character drew one.
+fn EntryAnim(bank) {
+    if getHitVar(animType) >= 3 {
+        changeAnim(value: FallAnim(AnimHitBack, bank))
+    }
+    if getHitVar(animType) < 3 {
+        changeAnim(value: HitAnim(bank, getHitVar(animType)))
+    }
+    if getHitVar(animType) >= 4 && selfAnimExist(5047 + getHitVar(animType)) {
+        changeAnim(value: 5047 + getHitVar(animType))
+    }
+}
+
+# Where a finished ground shake goes. Anything with vertical velocity or the
+# `fall` flag set leaves the ground; a sweep goes to the floor directly.
+fn AfterGroundShake(slide) {
+    if getHitVar(groundType) == 3 && selfAnimExist(AnimTripped) {
+        changeState(value: HitTrip)
+    }
+    if getHitVar(fall) || getHitVar(yvel) != 0 {
+        changeState(value: HitAirTransition)
+    }
+    changeState(value: slide)
+}
+
+# The ground slide: take the pushback, bleed it off after `slideTime`, stop
+# when the hit is over. `defenceMulSet(1)` is the important one -- a HitDef
+# that lowered the defender's defence for the duration leaves it lowered for
+# the rest of the round if nobody puts it back.
+fn GroundSlide(back_to, recoil_bank) {
+    if time == 0 {
+        hitVelSet(x: 1)
+    }
+    if animTime == 0 && selfAnimExist(recoil_bank + getHitVar(animType)) {
+        changeAnim(value: recoil_bank + getHitVar(animType))
+    }
+    if time >= getHitVar(slideTime) {
+        velMul(x: 0.6)
+    }
+    if hitOver {
+        velSet(x: 0)
+        defenceMulSet(value: 1)
+        changeState(value: back_to, ctrl: 1)
+    }
+}
+
+state HitShake = 5000 (type: S, movetype: H, physics: N, velset: 0, 0) {
+    # Hit while standing. Frozen for `getHitVar(hitShakeTime)`; the animation
+    # is chosen once, here, and the rest of the chain inherits it.
+    if time == 0 {
+        EntryAnim(ifElse(getHitVar(groundType) == 2, AnimHitLow, AnimHitHigh))
+        # Knocked off the ground by a blow that carries a vertical velocity:
+        # become airborne now, so the physics for this tick are already right.
+        if (getHitVar(yvel) != 0 || getHitVar(fall)) && pos y != 0 {
+            stateTypeSet(stateType: A)
+        }
+    }
+    if hitShakeOver {
+        AfterGroundShake(HitStand)
+    }
+}
+
+state HitStand = 5001 (type: S, movetype: H, physics: S) {
+    GroundSlide(Stand, ifElse(getHitVar(groundType) == 2, AnimHitRecoilLow,
+                                                          AnimHitRecoilHigh))
+}
+
+state CrouchHitShake = 5010 (type: C, movetype: H, physics: N, velset: 0, 0) {
+    # The engine sends a crouching fighter here rather than to 5000, so the
+    # crouch animation bank is right by default rather than by a branch.
+    if time == 0 {
+        EntryAnim(AnimHitCrouch)
+        if (getHitVar(yvel) != 0 || getHitVar(fall)) && pos y != 0 {
+            stateTypeSet(stateType: A)
+        }
+    }
+    if hitShakeOver {
+        AfterGroundShake(HitCrouch)
+    }
+}
+
+state HitCrouch = 5011 (type: C, movetype: H, physics: C) {
+    GroundSlide(Crouch, AnimHitRecoilCrouch)
+}
+
+state HitAirShake = 5020 (type: A, movetype: H, physics: N, velset: 0, 0) {
+    # Hit while already airborne. Note this is the air shake, not -- as the
+    # animation numbering suggests -- the sweep. The sweep is 5070.
+    if time == 0 {
+        EntryAnim(ifElse(getHitVar(airType) == 2, AnimHitLow, AnimHitHigh))
+    }
+    if hitShakeOver {
+        changeState(value: HitAirTransition)
+    }
+}
+
+state HitAirTransition = 5030 (type: A, movetype: H, physics: N) {
+    if time == 0 {
+        hitVelSet(x: 1, y: 1)
+    }
+    HitGravity()
+    if hitOver && vel y > 0 && pos y >= 10 {
+        changeState(value: ifElse(hitFall, HitAirFall, HitAirRecover))
+    }
+    if animTime == 0 {
+        changeState(value: HitAirUp)
+    }
+}
+
+state HitAirUp = 5035 (type: A, movetype: H, physics: N) {
+    if time == 0 && selfAnimExist(AnimHitTransition)
+                 && anim != AnimFallUpType && anim != AnimLieDownHitUp {
+        changeAnim(value: AnimHitTransition)
+    }
+    HitGravity()
+    # The ordinary exit is coming back down with the hit over. `time >= 120`
+    # is the net under it: a HitDef with `yaccel = 0` never brings the fighter
+    # down at all, and two seconds in an air-hit transition is not a thing any
+    # character means. Deliberately a tick cap and not `common1.cns`'s "no
+    # transition animation, leave at once" -- that one leaves on the entry
+    # tick, before there is a velocity to land with, and measured three more
+    # fighters left hovering rather than fewer.
+    if (hitOver && vel y > 0 && pos y >= 10) || time >= 120 {
+        changeState(value: ifElse(hitFall, HitAirFall, HitAirRecover))
+    }
+}
+
+state HitAirRecover = 5040 (type: A, movetype: H, physics: N) {
+    if !alive {
+        changeState(value: HitAirFall)
+    }
+    if time == 0 && animTime == 0 && anim != AnimAirRecover
+                 && anim != AnimHitTransition {
+        changeAnim(value: FallAnim(AnimAirRecover, AnimHitTransition))
+    }
+    if hitOver {
+        ctrlSet(value: 1)
+        stateTypeSet(moveType: I)
+    }
+    HitGravity()
+    if vel y > 0 && pos y >= 0 {
+        changeState(value: JumpLand)
+    }
+}
+
+state HitAirFall = 5050 (type: A, movetype: H, physics: N) {
+    if time == 0 && anim != AnimHitTransition && anim != AnimFallUpType {
+        changeAnim(value: FallAnim(AnimFallUp, AnimHitBack))
+    }
+    if anim in [AnimFallUp, 5059] && vel y >= ifElse(anim == AnimFallUp, 1, -2)
+       && selfAnimExist(anim + 10) {
+        @persistent(0)
+        changeAnim(value: anim + 10)
+    }
+    HitGravity()
+    if alive && canRecover && command == "recovery" {
+        if vel y > 0 && pos y >= -20 {
+            changeState(value: FallRecoverGround)
+        }
+        if vel y > -1 {
+            changeState(value: FallRecoverAir)
+        }
+    }
+    if vel y > 0 && pos y >= 0 {
+        changeState(value: FallBounce)
+    }
+}
+
+state HitTrip = 5070 (type: A, movetype: H, physics: N, velset: 0, 0) {
+    # Swept. A separate entry because the animation is one frame of losing
+    # your footing rather than a reaction, and it has no strength banks.
+    changeAnim(value: FallAnim(AnimTripped, AnimHitBack))
+    if hitShakeOver {
+        changeState(value: HitTripFall)
+    }
+}
+
+state HitTripFall = 5071 (type: A, movetype: H, physics: N) {
+    if time == 0 {
+        hitVelSet(x: 1, y: 1)
+    }
+    HitGravity()
+    if vel y > 0 && pos y >= 15 {
+        changeState(value: LieDown)
+    }
+}
+
+state HitLieDownShake = 5080 (type: L, movetype: H, physics: N, velset: 0, 0) {
+    # Hit while already on the floor. The engine routes a `LieDown` fighter
+    # here, and a blow with no lift keeps them there.
+    if time == 0 {
+        changeAnim(value: FallAnim(
+            ifElse(getHitVar(yvel) == 0, AnimLieDownHit, AnimLieDownHitUp),
+            AnimHitBack))
+    }
+    if hitShakeOver {
+        if getHitVar(yvel) != 0 {
+            changeState(value: HitAirTransition)
+        }
+        changeState(value: HitLieDownFall)
+    }
+}
+
+state HitLieDownFall = 5081 (type: L, movetype: H, physics: C) {
+    if time == 0 {
+        hitVelSet(x: 1)
+        sysVar(0) = 1
+    }
+    if hitOver {
+        velSet(x: 0)
+        changeState(value: LieDown)
+    }
+}
+
+state FallBounce = 5100 (type: L, movetype: H, physics: N) {
+    # Hitting the floor. `posFreeze` holds the body still for the impact
+    # animation while velocity is still being read for the landing sound.
+    if time == 0 {
+        if getHitVar(fall.yvel) == 0 && vel x > 1 {
+            velSet(x: 1)
+        }
+        fallEnvShake()
+        sysVar(1) = floor(vel y)
+        changeAnim(value: FallAnim(AnimHitGround, AnimLieDown))
+        posSet(y: 0)
+        velSet(y: 0)
+        velMul(x: 0.75)
+        # A hit with no bounce in it puts them straight down.
+        if getHitVar(fall.yvel) == 0 {
+            changeState(value: LieDown)
+        }
+    }
+    if time == 1 {
+        gameMakeAnim(value: 60 + (sysVar(1) > 5) + (sysVar(1) > 14), pos: 0, 0, under: 1)
+        playSnd(value: F7, (sysVar(1) > 5) + (sysVar(1) > 14))
+    }
+    if time == 3 {
+        hitFallDamage()
+    }
+    posFreeze()
+    if animTime == 0 {
+        changeState(value: FallBounceUp)
+    }
+}
+
+state FallBounceUp = 5101 (type: L, movetype: H, physics: N) {
+    if time == 0 {
+        changeAnim(value: FallAnim(AnimFallBounceUp, AnimHitGroundUp))
+        hitFallVel()
+        posSet(y: 20)
+    }
+    velAdd(y: 0.4)
+    if vel y > 0 && pos y >= 12 {
+        changeState(value: LieDown)
+    }
+}
+
+state LieDown = 5110 (type: L, movetype: H, physics: N) {
+    # On the floor. Either they get up, or -- if this was the blow that did
+    # it -- they do not.
+    if time == 0 {
+        fallEnvShake()
+        changeAnim(value: FallAnim(AnimLieDownFromBounce, AnimLieDown))
+        hitFallDamage()
+        posSet(y: 0)
+        velSet(y: 0)
+        if getHitVar(fall.yvel) != 0 {
+            sysVar(1) = floor(vel y)
+        }
+        # `sysvar(0)` is set by 5081 for a body that was already down, so the
+        # landing thump does not play twice for one knockdown.
+        if !sysVar(0) {
+            playSnd(value: F7, (sysVar(1) > 5) + (sysVar(1) > 14))
+            gameMakeAnim(value: 60 + (sysVar(1) > 5) + (sysVar(1) > 14), pos: 0, 0, under: 1)
+        }
+        sysVar(0) = 0
+    }
+    velMul(x: 0.85)
+    if anim in [AnimLieDownFromBounce, 5179] && animTime == 0
+       && selfAnimExist(AnimLieDown + (anim % 10)) {
+        @persistent(0)
+        changeAnim(value: AnimLieDown + (anim % 10))
+    }
+    if !alive && animTime == 0 && anim in [AnimLieDown, 5119] {
+        changeState(value: LieDead)
+    }
+}
+
+state GetUp = 5120 (type: L, physics: N) {
+    # Standing back up. The `notHitBy` window is the reason a knockdown is not
+    # an infinite: without it the attacker simply hits the body again on the
+    # frame it leaves the floor, forever.
+    if time == 0 {
+        changeAnim(value: FallAnim(AnimGetUp, AnimLieDown))
+        velSet(x: 0)
+    }
+    notHitBy(value: SCA, time: 1)
+    if animTime == 0 {
+        hitFallSet(value: 1)
+        notHitBy(value: , NT, ST, HT, time: 12)
+        notHitBy(value2: SCA, time: 3)
+        changeState(value: Stand, ctrl: 1)
+    }
+}
+
+state LieDead = 5150 (type: L, movetype: H, physics: N, sprpriority: -3) {
+    if time == 0 {
+        changeAnim(value: FallAnim(AnimLieDead, AnimLieDown))
+    }
+    velMul(x: 0.85)
+    if vel x < 0.05 {
+        @persistent(0)
+        velSet(x: 0)
+    }
+    notHitBy(value: SCA, time: 1)
+}
+
+state FallRecoverGround = 5200 (type: A, movetype: H, physics: N) {
+    if anim == AnimHitTransition && animTime == 0 {
+        changeAnim(value: FallAnim(AnimFallUp, AnimHitBack))
+    }
+    HitGravity()
+    if vel y > 0 && pos y >= 10 {
+        # `selfState`, not `changeState`: a fighter recovering from a custom
+        # state has to come back to their own file to do it.
+        selfState(value: FallRecoverGroundLand)
+    }
+}
+
+state FallRecoverGroundLand = 5201 (type: A, movetype: H, physics: A, anim: AnimFallRecoverGround) {
+    if time == 0 {
+        if p2dist x < -5 {
+            turn()
+        }
+        velSet(x: -0.15, y: -3.5)
+        posSet(y: 0)
+        palFX(time: 3, add: 128, 128, 128)
+    }
+    if time == 1 {
+        gameMakeAnim(value: 60, pos: 0, 0, under: 1)
+    }
+    notHitBy(value: SCA, time: 1)
+}
+
+state FallRecoverAir = 5210 (type: A, movetype: I, physics: N, anim: AnimFallRecoverAir) {
+    # The air recovery, steerable: the direction held at the moment of
+    # recovery decides where the fighter ends up, which is the whole point of
+    # spending the recovery on it.
+    if time == 0 {
+        palFX(time: 3, add: 128, 128, 128)
+        posFreeze(value: 4)
+        notHitBy(value: SCA, time: 15)
+        if p2dist x < -20 {
+            turn()
+        }
+    }
+    if time == 4 {
+        velMul(x: 0.8, y: 0.8)
+        velAdd(y: -4.5)
+        if vel y > 0 {
+            velMul(y: 0.5)
+        }
+        if vel y > -3 {
+            velAdd(y: -2)
+        }
+        if vel y > -2 {
+            velAdd(y: -1)
+        }
+        if command == "holdup" {
+            velAdd(y: -2)
+        }
+        if command == "holddown" {
+            velAdd(y: 1.5)
+        }
+        if command == "holdfwd" {
+            velMul(x: 1)
+        }
+        if command == "holdback" {
+            velAdd(x: -1)
+        }
+    }
+    if time >= 4 {
+        velAdd(y: 0.35)
+    }
+    if time == 20 {
+        ctrlSet(value: 1)
+    }
+    if vel y > 0 && pos y >= 0 {
+        changeState(value: JumpLand, ctrl: 1)
+    }
+}
+
+state LosePose = 170 (type: S, physics: S, ctrl: 0, velset: 0, 0) {
+    if time == 0 && selfAnimExist(170) {
+        changeAnim(value: 170)
+    }
+}
+
+state DrawPose = 175 (type: S, physics: S, ctrl: 0, velset: 0, 0) {
+    # A draw. Characters with no animation for one use their lose pose, which
+    # is what the engine falls back to as well.
+    if time == 0 {
+        changeAnim(value: FallAnim(175, 170))
+    }
+}
+
+state Intro = 190 (type: S, ctrl: 0, velset: 0, 0) {
+    # Two hooks, not two waits. Both fall through on the tick they are
+    # entered; they exist so a character can override one and have an
+    # entrance, and a character that overrides neither loses no time at all.
+    if selfAnimExist(AnimIntro) {
+        changeAnim(value: AnimIntro)
+    }
+    if time == 0 {
+        changeState(value: IntroWait)
+    }
+}
+
+state IntroWait = 191 (type: S, ctrl: 0) {
+    # No `ctrl: 1` on the way out: the intro chain deliberately leaves control
+    # off and the engine turns it back on when the round begins. A character
+    # whose own 191 runs long would otherwise be fighting before "Round 1".
+    if time == 0 {
+        changeState(value: Stand)
+    }
+}
+
+state KO = 5500 (type: S, physics: S, ctrl: 0, anim: AnimLoseKO, velset: 0, 0) {
+    # The continue pose. Standing, not on the floor -- this is the state a
+    # fighter is put in when the match is offering to continue, and a body
+    # lying down is state 5150's job.
+    if time == 0 && selfAnimExist(AnimKOPose) {
+        changeAnim(value: AnimKOPose)
+    }
+}
+
+state Initialise = 5900 (type: S, physics: S) {
+    # Once, as the fighter enters the round, before anything else runs.
+    #
+    # `roundsExisted == 0` gates the reset: a character who has already
+    # fought a round in this match keeps what they stored, which is how
+    # "remembers what you did last round" AI is written.
+    if roundsExisted == 0 {
+        varRangeSet(value: 0)
+        varRangeSet(fvalue: 0)
+    }
+    # Only the first round gets an entrance. Later rounds start from the
+    # engine's own round-start handling, and changing state here would race
+    # it.
+    if roundNo == 1 {
+        changeState(value: Intro)
+    }
+}

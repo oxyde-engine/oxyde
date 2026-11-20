@@ -1,0 +1,22 @@
+# The engine and tools ship as GitHub Release attachments, not committed blobs.
+release-artifacts/
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.swp
+
+# Runtime output a player's copy accumulates
+oxyde.cfg
+save/
+my_replays/
+*.log
+
+# Content pack (ships as a GitHub Release asset, not committed)
+knuckleup/
+stages/oxyde_*.def
+stages/oxyde_*.sff
+stages/bonus/
+chars/oxyde_*/
+!stages/oxyde_battle_ring.def
+!stages/oxyde_battle_ring.sff

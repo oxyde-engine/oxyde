@@ -1,0 +1,16 @@
+; Oxyde — default roster (engine).
+;
+; The engine ships with one reference fighter (Arroyo) and one stage. Add your
+; own MUGEN/Ikemen characters to chars/ and list them here, or install the Oxyde
+; content pack for every Oxyde stage and the bonus trials.
+[Characters]
+randomselect
+Arroyo, stages/oxyde_battle_ring.def
+
+[ExtraStages]
+stages/oxyde_battle_ring.def
+
+[Options]
+arcade.maxmatches = 6,1,1,0,0,0,0,0,0,0
+team.maxmatches   = 4,1,1,0,0,0,0,0,0,0
+bonus.interval = 0
